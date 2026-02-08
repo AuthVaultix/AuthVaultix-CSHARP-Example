@@ -13,95 +13,111 @@ namespace Client
 {
     public partial class LoginForm : Form
     {
-        public static AuthVaultixClient Client = new AuthVaultixClient(   
-            appName: "Teamdeveloperxd",
-            ownerId: "5d36476ca4",
-            secret: "a7b1b6b29e179dd1435e1afe799c658080f853652714362c72239281e983932f",
-            version: "1.0"
+
+        public static AuthVaultixClient Client = new AuthVaultixClient(
+            appName: "",
+            ownerId: "",
+            secret: "",
+            version: ""
         );
 
         public LoginForm()
         {
             InitializeComponent();
             Drag.MakeDraggable(this);
-            Client.Init();
-
-
+            string initMsg;
+            if (!Client.Init(out initMsg))
+            {
+                MessageBox.Show(initMsg, "Initialization Failed");
+                this.Close(); 
+                return;
+            }
         }
 
         private void LoginBtn_Click(object sender, EventArgs e)
         {
             try
             {
-                var user = Client.Login(userFild.Text, pasFild.Text);
-
+                string loginMsg;
+                if (!Client.Login(userFild.Text, pasFild.Text, out loginMsg))
+                {
+                    MessageBox.Show(loginMsg, "Login Failed");
+                    return;
+                }
+                // Login successful
                 MainForm main = new MainForm();
                 main.Show();
                 this.Hide();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show("" + ex.Message); }
+
         }
 
         private void RegisterBtn_Click(object sender, EventArgs e)
         {
             try
             {
-                var user = Client.Register(userFild.Text, pasFild.Text, keyFild.Text, emailFild.Text);
-
+                string regMsg;
+                if (!Client.Register(userFild.Text, pasFild.Text, keyFild.Text, out regMsg, emailFild.Text))
+                {
+                    MessageBox.Show(regMsg, "Registration Failed");
+                    return;
+                }
+                // Register successful
                 MainForm main = new MainForm();
                 main.Show();
                 this.Hide();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show("" + ex.Message); }
+
         }
 
         private void LicenceBitn_Click(object sender, EventArgs e)
         {
             try
             {
-                var user = Client.LicenseLogin(keyFild.Text);
+                string licMsg;
+                if (!Client.LicenseLogin(keyFild.Text, out licMsg))
+                {
+                    MessageBox.Show(licMsg, "License Login Failed");
+                    return;
+                }
 
                 MainForm main = new MainForm();
                 main.Show();
                 this.Hide();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            catch (Exception ex){MessageBox.Show("" + ex.Message);}
         }
 
         private void upgradeBtn_Click(object sender, EventArgs e)
         {
             try
             {
-                Client.Upgrade(userFild.Text, keyFild.Text);
-                MessageBox.Show("Status: Upgraded successfully!");
+                string upgradeMsg;
+                if (!Client.Upgrade(userFild.Text, keyFild.Text, out upgradeMsg))
+                {
+                    MessageBox.Show(upgradeMsg, "Upgrade Failed");
+                    return;
+                }
+                MessageBox.Show("Upgrade successful!", "Success");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            catch (Exception ex){MessageBox.Show("" + ex.Message);}
         }
 
         private void forgotBtn_Click(object sender, EventArgs e)
         {
             try
             {
-                Client.ForgotPassword(userFild.Text, emailFild.Text);
-
-                MessageBox.Show("Reset email sent. Check your inbox.");
+                string msg;
+                if (!Client.ForgotPassword(userFild.Text, keyFild.Text, out msg))
+                {
+                    MessageBox.Show(msg, "Forgot Password Failed");
+                    return;
+                }
+                MessageBox.Show("Reset email sent successfully", "Success");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            catch (Exception ex){MessageBox.Show("" + ex.Message);}
         }
 
         private void closeBtn_Click(object sender, EventArgs e)

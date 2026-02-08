@@ -113,7 +113,7 @@
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label7.Location = new System.Drawing.Point(481, 201);
+            this.label7.Location = new System.Drawing.Point(481, 198);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(40, 15);
@@ -125,7 +125,7 @@
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label6.Location = new System.Drawing.Point(481, 150);
+            this.label6.Location = new System.Drawing.Point(481, 148);
             this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(71, 15);
@@ -137,7 +137,7 @@
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label5.Location = new System.Drawing.Point(481, 100);
+            this.label5.Location = new System.Drawing.Point(481, 98);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(62, 15);
@@ -149,7 +149,7 @@
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label4.Location = new System.Drawing.Point(478, 51);
+            this.label4.Location = new System.Drawing.Point(478, 49);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(65, 15);
@@ -229,6 +229,8 @@
             // emailFild
             // 
             this.emailFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.emailFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.emailFild.ForeColor = System.Drawing.Color.White;
             this.emailFild.Location = new System.Drawing.Point(481, 215);
             this.emailFild.Multiline = true;
             this.emailFild.Name = "emailFild";
@@ -238,6 +240,8 @@
             // keyFild
             // 
             this.keyFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.keyFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.keyFild.ForeColor = System.Drawing.Color.White;
             this.keyFild.Location = new System.Drawing.Point(481, 165);
             this.keyFild.Multiline = true;
             this.keyFild.Name = "keyFild";
@@ -247,6 +251,8 @@
             // pasFild
             // 
             this.pasFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.pasFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pasFild.ForeColor = System.Drawing.Color.White;
             this.pasFild.Location = new System.Drawing.Point(481, 115);
             this.pasFild.Multiline = true;
             this.pasFild.Name = "pasFild";
@@ -256,6 +262,8 @@
             // userFild
             // 
             this.userFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.userFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.userFild.ForeColor = System.Drawing.Color.White;
             this.userFild.Location = new System.Drawing.Point(481, 66);
             this.userFild.Multiline = true;
             this.userFild.Name = "userFild";

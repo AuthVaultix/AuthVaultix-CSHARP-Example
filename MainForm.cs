@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AuthVaultix;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,14 +24,21 @@ namespace Client
 
         public static DateTime UnixToDate(string unix)
         {
-            return DateTimeOffset.FromUnixTimeSeconds(long.Parse(unix)).DateTime;
+            if (long.TryParse(unix, out long unixTime))
+            {
+                return DateTimeOffset.FromUnixTimeSeconds(unixTime).DateTime;
+            }
+            else
+            {
+                return DateTime.MinValue;
+            }
         }
         public string GetTimeLeft()
         {
             var sub = LoginForm.Client.CurrentUser.subscriptions[0];
             long expiry = long.Parse(sub.expiry);
 
-            DateTime expDate =DateTimeOffset.FromUnixTimeSeconds(expiry).DateTime;
+            DateTime expDate = DateTimeOffset.FromUnixTimeSeconds(expiry).DateTime;
 
             TimeSpan diff = expDate - DateTime.Now;
 
@@ -50,29 +58,30 @@ namespace Client
             userDataField.Items.Add($"Time Left: {GetTimeLeft()}");
             try
             {
-                var onlineUsers = LoginForm.Client.FetchOnline();
+                List<OnlineUser> onlineUsers;
+                string msg;
 
-                if (onlineUsers != null)
+                if (!LoginForm.Client.FetchOnline(out onlineUsers, out msg))
                 {
-                    onlineUsersField.Items.Clear();
-                    foreach (var user in onlineUsers)
-                    {
-                        onlineUsersField.Items.Add(user.credential);
-                    }
+                    return;
                 }
+                onlineUsersField.Items.Clear();
+                foreach (var user in onlineUsers)
+                onlineUsersField.Items.Add(user.credential);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            catch (Exception ex){MessageBox.Show("Status: " + ex.Message);}
         }
 
         private void sendLogDataBtn_Click(object sender, EventArgs e)
         {
             try
             {
-                LoginForm.Client.Log(logDataField.Text);
-                MessageBox.Show(LoginForm.Client.LastMessage);
+                string logMsg;
+                if (!LoginForm.Client.Log(logDataField.Text, out logMsg))
+                {
+                    MessageBox.Show("Log failed: " + logMsg);
+                }
+                else { MessageBox.Show("Log failed: " + logMsg); }
             }
             catch (Exception ex)
             {
@@ -82,97 +91,88 @@ namespace Client
 
         private void banBtn_Click(object sender, EventArgs e)
         {
-            try
+            string msg;
+            if (LoginForm.Client.Ban("Cheating detected", out msg))
             {
-                LoginForm.Client.Ban("Testing ban");
-                MessageBox.Show(LoginForm.Client.LastMessage);
-
+                MessageBox.Show(msg, "Banned");
+                MessageBox.Show("Please reopen this program");
+                Application.Exit(); // better than Environment.Exit(0) for WinForms
+                return;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            else{MessageBox.Show(msg, "Ban Failed");}
         }
 
         private void checkSessionBtn_Click(object sender, EventArgs e)
         {
-            try
+            string msg;
+            if (!LoginForm.Client.Check(out msg))
             {
-                LoginForm.Client.Check();
-                MessageBox.Show(LoginForm.Client.LastMessage);
-
+                // session expired / invalid
+                MessageBox.Show(msg, "Session Error");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            else { MessageBox.Show(msg, "Session Error"); }
         }
 
         private void CheackBlacklistBtn_Click(object sender, EventArgs e)
         {
-            try
+
+            string msg;
+            if (!LoginForm.Client.CheckBlacklist(out msg))
             {
-                LoginForm.Client.CheckBlacklist();
-                MessageBox.Show(LoginForm.Client.LastMessage);
+                MessageBox.Show(msg);
+                return;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            else { MessageBox.Show(msg); }
         }
 
         private void fetchGlobalVariableBtn_Click(object sender, EventArgs e)
         {
-            try
+            string val, msg;
+            if (!LoginForm.Client.GetGlobalVar(globalVariableField.Text, out val, out msg))
             {
-                string value = LoginForm.Client.GetGlobalVar(globalVariableField.Text);
-                MessageBox.Show("Value: " + value);
+                MessageBox.Show(msg, "Error");
+                return;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message);
-            }
+            else { MessageBox.Show("Global var value: " + val); }
         }
 
         private void downloadFileBtn_Click(object sender, EventArgs e)
         {
-            try
+            byte[] bytes; string msg;
+            if (!LoginForm.Client.Download("", out bytes, out msg))
             {
-                byte[] fileBytes = LoginForm.Client.Download("");
-                File.WriteAllBytes(filePathField.Text + "\\" + fileExtensionField.Text, fileBytes);
+                File.WriteAllBytes(filePathField.Text + "\\" + fileExtensionField.Text, bytes);
+                MessageBox.Show(msg, "Download Failed");
+                return;
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Download error: " + ex.Message);
+                File.WriteAllBytes(Directory.GetCurrentDirectory() + "\\test.png", bytes);
+                MessageBox.Show("Downloaded " + bytes.Length + " bytes", "Success");
             }
         }
 
         private void fetchUserVarBtn_Click(object sender, EventArgs e)
         {
-            try
+            string val, msg;
+            if (!LoginForm.Client.GetVar(varField.Text, out val, out msg))
             {
-                string value = LoginForm.Client.GetVar(varField.Text);
-                MessageBox.Show("Value: " + value);
+                MessageBox.Show(msg, "GetVar Failed");
+                return;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            else { MessageBox.Show("Var value: " + val); }
         }
 
         private void setUserVarBtn_Click(object sender, EventArgs e)
         {
-            try
+            string msg;
+            if (!LoginForm.Client.SetVar(varField.Text, varDataField.Text, out msg))
             {
-                LoginForm.Client.SetVar(varField.Text, varDataField.Text);
-                MessageBox.Show(LoginForm.Client.LastMessage);
+                MessageBox.Show(msg, "SetVar Failed");
+                return;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Status: " + ex.Message);
-            }
+            else { MessageBox.Show(msg); }
         }
-
 
         private void closeBtn_Click(object sender, EventArgs e)
         {
@@ -183,11 +183,12 @@ namespace Client
         {
             try
             {
-                bool ok = await LoginForm.Client.ChatSend(chatMsgField.Text, chatchannel);
+                string msg;
+                bool ok =  LoginForm.Client.ChatSend(chatMsgField.Text, chatchannel, out msg);
 
                 if (ok)
                 {
-                    chatroomGrid.Rows.Insert(0,LoginForm.Client.CurrentUser.username,chatMsgField.Text,DateTime.Now.ToString());
+                    chatroomGrid.Rows.Insert(0, LoginForm.Client.CurrentUser.username, chatMsgField.Text, DateTime.Now.ToString());
                     chatMsgField.Clear();
                 }
                 else
@@ -209,7 +210,7 @@ namespace Client
             {
                 timer1.Stop();
                 chatroomGrid.Rows.Clear();
-                chatroomGrid.Rows.Insert(0,"AuthVaultix","No channel selected",DateTime.Now);return;
+                chatroomGrid.Rows.Insert(0, "AuthVaultix", "No channel selected", DateTime.Now); return;
             }
 
             try
@@ -220,12 +221,12 @@ namespace Client
 
                 if (messages == null || messages.Count == 0)
                 {
-                    chatroomGrid.Rows.Insert(0,"AuthVaultix","No chat messages",DateTime.Now);return;
+                    chatroomGrid.Rows.Insert(0, "AuthVaultix", "No chat messages", DateTime.Now); return;
                 }
 
                 foreach (var msg in messages)
                 {
-                    chatroomGrid.Rows.Insert(0,msg.author,msg.message,DateTimeOffset.FromUnixTimeSeconds(msg.timestamp).ToLocalTime().DateTime);
+                    chatroomGrid.Rows.Insert(0, msg.author, msg.message, DateTimeOffset.FromUnixTimeSeconds(msg.timestamp).ToLocalTime().DateTime);
                 }
             }
             catch (Exception ex)
