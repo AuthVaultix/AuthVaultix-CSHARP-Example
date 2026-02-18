@@ -1,4 +1,4 @@
-﻿using AuthVaultix;
+using AuthVaultix;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -46,6 +46,17 @@ namespace Client
         }
         private void MainForm_Load(object sender, EventArgs e)
         {
+            // Fetches the user's "level" variable from the server. This is used to determine user access rights (e.g., VIP status). The server stores this variable per account.Based on its value, we can enable or restrict certain features.
+            string level = LoginForm.Client.GetVar("level");
+
+            if (level == "vip")
+            {
+                MessageBox.Show("⚠ Your update support has expired.\n\nPlease renew your subscription to continue receiving updates and support.","Support Expired",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+            }
+            else
+            {
+                //MessageBox.Show("🔒 Not a VIP user.");
+            }
 
             userDataField.Items.Add($"Username: {LoginForm.Client.CurrentUser.username}");
             userDataField.Items.Add($"License: {LoginForm.Client.CurrentUser.subscriptions[0].key}");
@@ -104,13 +115,8 @@ namespace Client
 
         private void checkSessionBtn_Click(object sender, EventArgs e)
         {
-            string msg;
-            if (!LoginForm.Client.Check(out msg))
-            {
-                // session expired / invalid
-                MessageBox.Show(msg, "Session Error");
-            }
-            else { MessageBox.Show(msg, "Session Error"); }
+            if (LoginForm.Client.Check())
+            {MessageBox.Show(LoginForm.Client.RisponceCollection);return;}
         }
 
         private void CheackBlacklistBtn_Click(object sender, EventArgs e)
@@ -124,17 +130,24 @@ namespace Client
             }
             else { MessageBox.Show(msg); }
         }
+        public static string GetPattern(string value)
+        {
+            return LoginForm.Client.GetGlobalVar(value);
+        }
 
         private void fetchGlobalVariableBtn_Click(object sender, EventArgs e)
         {
-            string val, msg;
-            if (!LoginForm.Client.GetGlobalVar(globalVariableField.Text, out val, out msg))
+            string val = LoginForm.Client.GetGlobalVar(globalVariableField.Text);
+
+            if (val == null)
             {
-                MessageBox.Show(msg, "Error");
+                MessageBox.Show(LoginForm.Client.RisponceCollection);
                 return;
             }
-            else { MessageBox.Show("Global var value: " + val); }
+
+            MessageBox.Show("Global var value: " + val);
         }
+
 
         private void downloadFileBtn_Click(object sender, EventArgs e)
         {
@@ -154,25 +167,28 @@ namespace Client
 
         private void fetchUserVarBtn_Click(object sender, EventArgs e)
         {
-            string val, msg;
-            if (!LoginForm.Client.GetVar(varField.Text, out val, out msg))
+            string val = LoginForm.Client.GetVar(varField.Text);
+
+            if (val == null)
             {
-                MessageBox.Show(msg, "GetVar Failed");
+                MessageBox.Show(LoginForm.Client.RisponceCollection);
                 return;
             }
-            else { MessageBox.Show("Var value: " + val); }
+
+            MessageBox.Show(val);
         }
 
         private void setUserVarBtn_Click(object sender, EventArgs e)
         {
-            string msg;
-            if (!LoginForm.Client.SetVar(varField.Text, varDataField.Text, out msg))
+            if (!LoginForm.Client.SetVar(varField.Text, varDataField.Text))
             {
-                MessageBox.Show(msg, "SetVar Failed");
+                MessageBox.Show(LoginForm.Client.RisponceCollection);
                 return;
             }
-            else { MessageBox.Show(msg); }
+
+            MessageBox.Show(LoginForm.Client.RisponceCollection);
         }
+
 
         private void closeBtn_Click(object sender, EventArgs e)
         {
