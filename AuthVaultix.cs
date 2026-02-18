@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.IO;
 using System.Net;
@@ -37,9 +37,10 @@ namespace AuthVaultix
             ApiUrl = URL;
         }
 
-        public bool Init(out string serverMessage)
+        public string RisponceCollection { get; private set; } = "";
+        public bool Init()
         {
-            serverMessage = null;
+            RisponceCollection = "Initialization failed1";
 
             if (Initialized) return true;
 
@@ -59,7 +60,7 @@ namespace AuthVaultix
 
             if (response == "Authvaultix_Invalid")
             {
-                serverMessage = "Application not found";
+                RisponceCollection = "Application not found";
                 return false;
             }
 
@@ -67,11 +68,11 @@ namespace AuthVaultix
 
             if (!json.success)
             {
-                serverMessage = json.message ?? "Initialization failed";
+                RisponceCollection = json.message ?? "Initialization failed2";
                 return false;
             }
 
-            // ✅ client sirf session store kare
+            
             SessionId = json.sessionid;
             Initialized = true;
 
@@ -82,9 +83,9 @@ namespace AuthVaultix
         // ======================
         // LOGIN
         // ======================
-        public bool Login(string username, string password, out string serverMessage)
+        public bool Login(string username, string password)
         {
-            serverMessage = null;
+            RisponceCollection = null;
             InitGuard.EnsureInitialized(Initialized);
 
             string hwid = SID.Get();
@@ -106,7 +107,7 @@ namespace AuthVaultix
             if (!json.success)
             {
                 // ❗ message sirf user ko show karne ke liye
-                serverMessage = json.message ?? "Login failed";
+                RisponceCollection = json.message ?? "Login failed";
                 return false;
             }
 
@@ -123,68 +124,60 @@ namespace AuthVaultix
         // ======================
         // CHECK SESSION
         // ======================
-        public bool Check(out string serverMessage)
+      
+    public bool Check()
+    {
+        RisponceCollection = null;
+        InitGuard.EnsureInitialized(Initialized);
+
+        if (string.IsNullOrWhiteSpace(SessionId))
+            KillNow("Session missing");
+
+        var data = new NameValueCollection
         {
-            serverMessage = null;
-            InitGuard.EnsureInitialized(Initialized);
+            ["type"] = "check",
+            ["sessionid"] = SessionId,
+            ["name"] = AppName,
+            ["ownerid"] = OwnerId
+        };
 
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session expired or not initialized. Please login again.";
-                return false;
-            }
+        string response = Request(ApiUrl, data, out string signature);
 
-            var data = new NameValueCollection
-            {
-                ["type"] = "check",
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
+        if (response == null)
+            KillNow("Connection failed");
 
-            string response = Request(ApiUrl, data, out string signature);
+        if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
+            KillNow("Invalid response format");
 
-            if (response == null)
-            {
-                serverMessage = "Connection failed. Please try again.";
-                return false;
-            }
+        var json = JsonConvert.DeserializeObject<CheckResponse>(response);
 
-            if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
+        if (json == null)
+            KillNow("Invalid JSON");
 
-            var json = JsonConvert.DeserializeObject<CheckResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response";
-                return false;
-            }
-
-            
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Session check failed";
-                return false;
-            }
-
-           
-            serverMessage = json.message ?? "Session validated";
-            LastMessage = serverMessage;
-            LastMessage1 = serverMessage;
-            return true;
-        }
+        if (!json.success)
+            KillNow(json.message ?? "Session check failed");
 
 
-        // ======================
-        // REGISTER
-        // ======================
-        public bool Register(string username,string password,string licenseKey,out string serverMessage,string email = "")
+        RisponceCollection = json.message;
+        LastMessage = RisponceCollection;
+        LastMessage1 = RisponceCollection;
+
+        return true;
+    }
+
+    private void KillNow(string reason)
+    {
+        Environment.FailFast(reason);  // Hard crash
+    }
+
+
+
+    // ======================
+    // REGISTER
+    // ======================
+    public bool Register(string username, string password, string licenseKey, string email = "")
         {
-            serverMessage = null;
+            RisponceCollection = null;
 
             InitGuard.EnsureInitialized(Initialized);
 
@@ -209,23 +202,21 @@ namespace AuthVaultix
 
             if (!json.success)
             {
-                // ❗ sirf user‑friendly message
-                serverMessage = json.message ?? "Registration failed";
+                RisponceCollection = json.message;
                 return false;
             }
 
             CurrentUser = json.info;
-            SessionId = json.sessionid; // (agar server new session deta hai)
+            SessionId = json.sessionid; // (if new session)
             return true;
         }
 
 
         // ======================
-        // LICENSE LOGIN (AUTO REGISTER)
+        // LICENSE LOGIN/AUTO REGISTER
         // ======================
-        public bool LicenseLogin(string licenseKey, out string serverMessage)
+        public bool LicenseLogin(string licenseKey)
         {
-            serverMessage = null;
 
             InitGuard.EnsureInitialized(Initialized);
 
@@ -247,13 +238,13 @@ namespace AuthVaultix
 
             if (!json.success)
             {
-                serverMessage = json.message ?? "License login failed";
+                RisponceCollection = json.message;
                 return false;
             }
 
 
             CurrentUser = json.info;
-            SessionId = json.sessionid; // agar server rotate karta hai
+            SessionId = json.sessionid; // if server rotate new session
             return true;
         }
 
@@ -400,146 +391,6 @@ namespace AuthVaultix
                 serverMessage = "Invalid file encoding (base64)";
                 return false;
             }
-        }
-
-
-
-
-        // ======================
-        // GET USER VARIABLE
-        // ======================
-        public bool GetVar(string varName, out string value, out string serverMessage)
-        {
-            value = null;
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(varName))
-            {
-                serverMessage = "Invalid variable name.";
-                return false;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "getvar",
-                ["var"] = varName,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Request failed. Please try again.";
-                return false;
-            }
-
-            
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<GetVarResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response.";
-                return false;
-            }
-
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Failed to get variable.";
-                return false;
-            }
-
-  
-            value = json.response;
-            serverMessage = json.message ?? "OK";
-            return true;
-        }
-
-        // ======================
-        // SET USER VARIABLE
-        // ======================
-        public bool SetVar(string varName, string value, out string serverMessage)
-        {
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(varName))
-            {
-                serverMessage = "Invalid variable name.";
-                return false;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "setvar",
-                ["var"] = varName,
-                ["data"] = value ?? string.Empty,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Request failed. Please try again.";
-                return false;
-            }
-
-            
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<BasicResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response.";
-                return false;
-            }
-
-            LastMessage = json.message;
-            LastMessage1 = json.message;
-
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Failed to set variable.";
-                return false;
-            }
-
-
-            serverMessage = json.message ?? "Variable updated successfully.";
-            return true;
         }
 
         // ======================
@@ -792,10 +643,8 @@ namespace AuthVaultix
         // ======================
         // FORGOT PASSWORD
         // ======================
-        public bool ForgotPassword(string username, string email, out string serverMessage)
+        public bool ForgotPassword(string username, string email)
         {
-            serverMessage = null;
-
             InitGuard.EnsureInitialized(Initialized);
 
             var data = new NameValueCollection
@@ -814,7 +663,7 @@ namespace AuthVaultix
 
             if (!json.success)
             {
-                serverMessage = json.message ?? "Failed to send reset email";
+                RisponceCollection = json.message;
                 return false;
             }
 
@@ -825,9 +674,8 @@ namespace AuthVaultix
         // ======================
         // UPGRADE
         // ======================
-        public bool Upgrade(string username, string licenseKey, out string serverMessage)
+        public bool Upgrade(string username, string licenseKey)
         {
-            serverMessage = null;
 
             InitGuard.EnsureInitialized(Initialized);
 
@@ -847,11 +695,11 @@ namespace AuthVaultix
 
             if (!json.success)
             {
-                serverMessage = json.message ?? "Upgrade failed";
+                RisponceCollection = json.message;
                 return false;
             }
 
-            // ✅ Only success
+
             Console.WriteLine("Upgrade successful: " + json.users[0].name);
             return true;
         }
@@ -859,24 +707,22 @@ namespace AuthVaultix
         // ======================
         // GET GLOBAL VAR
         // ======================
-        public bool GetGlobalVar(string varKey, out string value, out string serverMessage)
+        public string GetGlobalVar(string varKey)
         {
-            value = null;
-            serverMessage = null;
+            RisponceCollection = "";
 
             InitGuard.EnsureInitialized(Initialized);
 
-            
             if (string.IsNullOrWhiteSpace(SessionId))
             {
-                serverMessage = "Session missing. Please login again.";
-                return false;
+                RisponceCollection = "Session missing. Please login again.";
+                return null;
             }
 
             if (string.IsNullOrWhiteSpace(varKey))
             {
-                serverMessage = "Invalid variable key.";
-                return false;
+                RisponceCollection = "Invalid variable key.";
+                return null;
             }
 
             var data = new NameValueCollection
@@ -888,41 +734,132 @@ namespace AuthVaultix
                 ["ownerid"] = OwnerId
             };
 
-            string response = Request(ApiUrl, data, out string signature);
+            string sig;
+            string response = Request(ApiUrl, data, out sig);
 
-            
-            if (string.IsNullOrWhiteSpace(response))
+            if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
             {
-                serverMessage = "Request failed. Please try again.";
-                return false;
-            }
-
-            
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
+                RisponceCollection = "Invalid server response.";
+                return null;
             }
 
             var json = JsonConvert.DeserializeObject<GlobalVarResponse>(response);
 
+            if (json == null || !json.success)
+            {
+                RisponceCollection = json?.message ?? "Failed to fetch variable.";
+                return null;
+            }
+
+            RisponceCollection = "OK";
+            return json.message;  // actual value
+        }
+
+        // ======================
+        // GET USER VARIABLE
+        // ======================
+        public string GetVar(string varName)
+        {
+            RisponceCollection = "";
+
+            InitGuard.EnsureInitialized(Initialized);
+
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                RisponceCollection = "Session missing. Please login again.";
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(varName))
+            {
+                RisponceCollection = "Invalid variable name.";
+                return null;
+            }
+
+            var data = new NameValueCollection
+            {
+                ["type"] = "getvar",
+                ["var"] = varName,
+                ["sessionid"] = SessionId,
+                ["name"] = AppName,
+                ["ownerid"] = OwnerId
+            };
+
+            string sig;
+            string response = Request(ApiUrl, data, out sig);
+
+            if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
+            {
+                RisponceCollection = response?.Trim() ?? "Request failed.";
+                return null;
+            }
+
+            var json = JsonConvert.DeserializeObject<GetVarResponse>(response);
+
+            if (json == null || !json.success)
+            {
+                RisponceCollection = json?.message ?? "Failed to get variable.";
+                return null;
+            }
+
+            RisponceCollection = json.message ?? "OK";
+            return json.response; 
+        }
+        // ======================
+        // SET USER VARIABLE
+        // ======================
+        public bool SetVar(string varName, string value)
+        {
+            RisponceCollection = "";
+
+            InitGuard.EnsureInitialized(Initialized);
+
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                RisponceCollection = "Session missing. Please login again.";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(varName))
+            {
+                RisponceCollection = "Invalid variable name.";
+                return false;
+            }
+
+            var data = new NameValueCollection
+            {
+                ["type"] = "setvar",
+                ["var"] = varName,
+                ["data"] = value ?? string.Empty,
+                ["sessionid"] = SessionId,
+                ["name"] = AppName,
+                ["ownerid"] = OwnerId
+            };
+
+            string sig;
+            string response = Request(ApiUrl, data, out sig);
+
+            if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
+            {
+                RisponceCollection = response?.Trim() ?? "Request failed.";
+                return false;
+            }
+
+            var json = JsonConvert.DeserializeObject<BasicResponse>(response);
+
             if (json == null)
             {
-                serverMessage = "Invalid server response.";
+                RisponceCollection = "Invalid server response.";
                 return false;
             }
 
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Failed to fetch variable.";
-                return false;
-            }
+            RisponceCollection = json.message ?? (json.success ? "OK" : "Failed");
+            LastMessage = RisponceCollection;
+            LastMessage1 = RisponceCollection;
 
-            
-            value = json.message;   // global var value
-            serverMessage = "OK";
-            return true;
+            return json.success;
         }
+
 
         // ======================
         // CHAT SEND
@@ -1060,7 +997,6 @@ namespace AuthVaultix
             LastResponseMessage = json.message ?? "OK";
             return Task.FromResult(json.messages ?? new List<ChatMessage>());
         }
-
 
         private string Request(string url, NameValueCollection data, out string signature)
         {
