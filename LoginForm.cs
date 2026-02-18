@@ -1,4 +1,4 @@
-﻿using AuthVaultix;
+using AuthVaultix;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,61 +25,54 @@ namespace Client
         {
             InitializeComponent();
             Drag.MakeDraggable(this);
-            string initMsg;
-            if (!Client.Init(out initMsg))
-            {
-                MessageBox.Show(initMsg, "Initialization Failed");
-                this.Close(); 
-                return;
-            }
+            Client.Init();
         }
 
         private void LoginBtn_Click(object sender, EventArgs e)
         {
+
             try
             {
-                string loginMsg;
-                if (!Client.Login(userFild.Text, pasFild.Text, out loginMsg))
+                if (!Client.Login(userFild.Text, pasFild.Text))
                 {
-                    MessageBox.Show(loginMsg, "Login Failed");
+                    MessageBox.Show(Client.RisponceCollection, "Login Failed");
                     return;
                 }
+
                 // Login successful
                 MainForm main = new MainForm();
                 main.Show();
                 this.Hide();
             }
-            catch (Exception ex) { MessageBox.Show("" + ex.Message); }
-
+            catch (Exception ex){MessageBox.Show(ex.Message, "Error");}
         }
 
         private void RegisterBtn_Click(object sender, EventArgs e)
         {
             try
             {
-                string regMsg;
-                if (!Client.Register(userFild.Text, pasFild.Text, keyFild.Text, out regMsg, emailFild.Text))
+                if (!Client.Register(userFild.Text, pasFild.Text, keyFild.Text, emailFild.Text))
                 {
-                    MessageBox.Show(regMsg, "Registration Failed");
+                    MessageBox.Show(Client.RisponceCollection, "Registration Failed");
                     return;
+
                 }
                 // Register successful
                 MainForm main = new MainForm();
                 main.Show();
                 this.Hide();
             }
-            catch (Exception ex) { MessageBox.Show("" + ex.Message); }
-
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Error"); }
         }
 
         private void LicenceBitn_Click(object sender, EventArgs e)
         {
             try
             {
-                string licMsg;
-                if (!Client.LicenseLogin(keyFild.Text, out licMsg))
+
+                if (!Client.LicenseLogin(keyFild.Text))
                 {
-                    MessageBox.Show(licMsg, "License Login Failed");
+                    MessageBox.Show(Client.RisponceCollection, "License Login Failed");
                     return;
                 }
 
@@ -87,17 +80,16 @@ namespace Client
                 main.Show();
                 this.Hide();
             }
-            catch (Exception ex){MessageBox.Show("" + ex.Message);}
+            catch (Exception ex) { MessageBox.Show("" + ex.Message); }
         }
 
         private void upgradeBtn_Click(object sender, EventArgs e)
         {
             try
             {
-                string upgradeMsg;
-                if (!Client.Upgrade(userFild.Text, keyFild.Text, out upgradeMsg))
+                if (!Client.Upgrade(userFild.Text, keyFild.Text))
                 {
-                    MessageBox.Show(upgradeMsg, "Upgrade Failed");
+                    MessageBox.Show(Client.RisponceCollection, "Upgrade Failed");
                     return;
                 }
                 MessageBox.Show("Upgrade successful!", "Success");
@@ -109,10 +101,9 @@ namespace Client
         {
             try
             {
-                string msg;
-                if (!Client.ForgotPassword(userFild.Text, keyFild.Text, out msg))
+                if (!Client.ForgotPassword(userFild.Text, keyFild.Text))
                 {
-                    MessageBox.Show(msg, "Forgot Password Failed");
+                    MessageBox.Show(Client.RisponceCollection, "Forgot Password Failed");
                     return;
                 }
                 MessageBox.Show("Reset email sent successfully", "Success");
