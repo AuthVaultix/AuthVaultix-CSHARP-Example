@@ -867,28 +867,27 @@ namespace AuthVaultix
         public bool ChatSend(string message, string channel, out string serverMessage)
         {
             serverMessage = null;
-
+        
             InitGuard.EnsureInitialized(Initialized);
-
-            
+        
             if (string.IsNullOrWhiteSpace(SessionId))
             {
                 serverMessage = "Session missing. Please login again.";
                 return false;
             }
-
+        
             if (string.IsNullOrWhiteSpace(message))
             {
                 serverMessage = "Message cannot be empty.";
                 return false;
             }
-
+        
             if (string.IsNullOrWhiteSpace(channel))
             {
                 serverMessage = "Invalid channel.";
                 return false;
             }
-
+        
             var data = new NameValueCollection
             {
                 ["type"] = "chatsend",
@@ -898,41 +897,46 @@ namespace AuthVaultix
                 ["name"] = AppName,
                 ["ownerid"] = OwnerId
             };
-
-            
+        
             string response = Request(ApiUrl, data, out string signature);
-
-            
+        
             if (string.IsNullOrWhiteSpace(response))
             {
                 serverMessage = "Request failed. Please try again.";
                 return false;
             }
-
-            
+        
             if (response[0] != '{')
             {
                 serverMessage = response.Trim();
+                LastResponseMessage = serverMessage;
                 return false;
             }
-
+        
             var json = JsonConvert.DeserializeObject<ChatResponse>(response);
-
+        
             if (json == null)
             {
                 serverMessage = "Invalid server response.";
                 return false;
             }
-
+        
             LastResponseMessage = json.message;
-
+        
             if (!json.success)
             {
+                // 🔥 Muted special message
+                if (json.code == 403 && json.remaining_seconds > 0)
+                {
+                    serverMessage = $"Muted till {json.muted_until} (wait {json.remaining_human})";
+                    LastResponseMessage = serverMessage;
+                    return false;
+                }
+        
                 serverMessage = json.message ?? "Failed to send message.";
                 return false;
             }
-
-            
+        
             serverMessage = json.message ?? "Message sent.";
             return true;
         }
@@ -1262,10 +1266,22 @@ namespace AuthVaultix
         public string message { get; set; }
     }
 
-    public class ChatResponse //ChatResponse
+    public class ChatResponse
     {
         public bool success { get; set; }
+        public int code { get; set; }
         public string message { get; set; }
+        public string ownerid { get; set; }
+    
+        // mute extras (server se aa rahe)
+        public string muted_until { get; set; }
+        public long muted_until_ts { get; set; }
+        public int remaining_seconds { get; set; }
+        public int remaining_minutes { get; set; }
+        public string remaining_human { get; set; }
+    
+        public string server_time { get; set; }
+        public long server_time_ts { get; set; }
     }
 
 
@@ -1377,3 +1393,4 @@ public static class SID
         return sb.ToString();
     }
 }
+
