@@ -1,16 +1,17 @@
-using System;
-using System.Text;
-using System.IO;
-using System.Net;
-using System.Management;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Globalization;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Management;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace AuthVaultix
     public class AuthVaultixClient
     {
         private const string URL = "https://api.authvaultix.com/api/1.0/"; //apiUrl.TrimEnd('/') + "/"; 
+       // private const string URL = "https://keyauth.win/api/1.2/"; //apiUrl.TrimEnd('/') + "/"; 
 
         private string AppName;
         private string OwnerId;
@@ -867,27 +869,27 @@ namespace AuthVaultix
         public bool ChatSend(string message, string channel, out string serverMessage)
         {
             serverMessage = null;
-        
+
             InitGuard.EnsureInitialized(Initialized);
-        
+
             if (string.IsNullOrWhiteSpace(SessionId))
             {
                 serverMessage = "Session missing. Please login again.";
                 return false;
             }
-        
+
             if (string.IsNullOrWhiteSpace(message))
             {
                 serverMessage = "Message cannot be empty.";
                 return false;
             }
-        
+
             if (string.IsNullOrWhiteSpace(channel))
             {
                 serverMessage = "Invalid channel.";
                 return false;
             }
-        
+
             var data = new NameValueCollection
             {
                 ["type"] = "chatsend",
@@ -897,32 +899,32 @@ namespace AuthVaultix
                 ["name"] = AppName,
                 ["ownerid"] = OwnerId
             };
-        
+
             string response = Request(ApiUrl, data, out string signature);
-        
+
             if (string.IsNullOrWhiteSpace(response))
             {
                 serverMessage = "Request failed. Please try again.";
                 return false;
             }
-        
+
             if (response[0] != '{')
             {
                 serverMessage = response.Trim();
                 LastResponseMessage = serverMessage;
                 return false;
             }
-        
+
             var json = JsonConvert.DeserializeObject<ChatResponse>(response);
-        
+
             if (json == null)
             {
                 serverMessage = "Invalid server response.";
                 return false;
             }
-        
+
             LastResponseMessage = json.message;
-        
+
             if (!json.success)
             {
                 // 🔥 Muted special message
@@ -932,11 +934,11 @@ namespace AuthVaultix
                     LastResponseMessage = serverMessage;
                     return false;
                 }
-        
+
                 serverMessage = json.message ?? "Failed to send message.";
                 return false;
             }
-        
+
             serverMessage = json.message ?? "Message sent.";
             return true;
         }
@@ -1069,6 +1071,7 @@ namespace AuthVaultix
             }
             return true;
         }
+
         private bool VerifySignature(string body, string serverSignature, string type)
         {
             if (type == "log" || type == "file")
@@ -1084,6 +1087,7 @@ namespace AuthVaultix
             string localSig = HashHMAC(signKey, body);
             return FixedTimeEquals.CheckStringsFixedTime(localSig, serverSignature);
         }
+
         public static class ErrorHandler
         {
             [DllImport("kernel32.dll")]
@@ -1125,6 +1129,7 @@ namespace AuthVaultix
                 Environment.Exit(0);
             }
         }
+
         public static class FixedTimeEquals
         {
             public static bool CheckStringsFixedTime(string str1, string str2)
@@ -1148,6 +1153,7 @@ namespace AuthVaultix
                 return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
         }
+
         // ======================
         // UTILS
         // ======================
@@ -1266,20 +1272,19 @@ namespace AuthVaultix
         public string message { get; set; }
     }
 
-    public class ChatResponse
+    public class ChatResponse //ChatResponse
     {
         public bool success { get; set; }
-        public int code { get; set; }
         public string message { get; set; }
+        public int code { get; set; }
         public string ownerid { get; set; }
-    
-        // mute extras (server se aa rahe)
+
         public string muted_until { get; set; }
         public long muted_until_ts { get; set; }
         public int remaining_seconds { get; set; }
         public int remaining_minutes { get; set; }
         public string remaining_human { get; set; }
-    
+
         public string server_time { get; set; }
         public long server_time_ts { get; set; }
     }
@@ -1393,4 +1398,3 @@ public static class SID
         return sb.ToString();
     }
 }
-
