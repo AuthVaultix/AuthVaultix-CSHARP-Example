@@ -25,7 +25,11 @@ namespace Client
         {
             InitializeComponent();
             Drag.MakeDraggable(this);
-            Client.Init();
+            if (!Client.Init())
+            {
+                MessageBox.Show(Client.RisponceCollection);
+                return;
+            }
         }
 
         private void LoginBtn_Click(object sender, EventArgs e)
@@ -122,3 +126,4 @@ namespace Client
         }
     }
 }
+
