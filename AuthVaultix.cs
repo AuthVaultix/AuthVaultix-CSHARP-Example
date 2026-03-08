@@ -22,8 +22,7 @@ namespace AuthVaultix
     public class AuthVaultixClient
     {
         private const string URL = "https://api.authvaultix.com/api/1.0/"; //apiUrl.TrimEnd('/') + "/"; 
-       // private const string URL = "https://keyauth.win/api/1.2/"; //apiUrl.TrimEnd('/') + "/"; 
-
+       
         private string AppName;
         private string OwnerId;
         private string Secret;
@@ -1398,3 +1397,4 @@ public static class SID
         return sb.ToString();
     }
 }
+
