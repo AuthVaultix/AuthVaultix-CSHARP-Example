@@ -59,14 +59,14 @@ namespace Client
             }
 
             userDataField.Items.Add($"Username: {LoginForm.Client.CurrentUser.username}");
-            userDataField.Items.Add($"License: {LoginForm.Client.CurrentUser.subscriptions[0].key}");
-            userDataField.Items.Add($"Expires: {LoginForm.Client.CurrentUser.subscriptions[0].expiry}");
+            userDataField.Items.Add($"License: {LoginForm.Client.CurrentUser.subscriptions[0].key}");;
+            userDataField.Items.Add($"Expires: {LoginForm.Client.CurrentUser.subscriptions[0].ExpiryFormatted}");
             userDataField.Items.Add($"Subscription: {LoginForm.Client.CurrentUser.subscriptions[0].subscription}");
             userDataField.Items.Add($"IP: {LoginForm.Client.CurrentUser.ip}");
             userDataField.Items.Add($"HWID: {LoginForm.Client.CurrentUser.hwid}");
-            userDataField.Items.Add($"Creation Date: {UnixToDate(LoginForm.Client.CurrentUser.createdate)}");
-            userDataField.Items.Add($"Last Login: {UnixToDate(LoginForm.Client.CurrentUser.lastlogin)}");
-            userDataField.Items.Add($"Time Left: {GetTimeLeft()}");
+            userDataField.Items.Add($"Creation Date: {LoginForm.Client.CurrentUser.CreationDateFormatted}");
+            userDataField.Items.Add($"Last Login: {LoginForm.Client.CurrentUser.LastLoginFormatted}");
+            userDataField.Items.Add($"Time Left: {LoginForm.Client.CurrentUser.subscriptions[0].TimeLeft}");
             try
             {
                 List<OnlineUser> onlineUsers;
