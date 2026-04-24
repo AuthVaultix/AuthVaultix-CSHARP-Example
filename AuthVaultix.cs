@@ -1305,6 +1305,26 @@ namespace AuthVaultix
         public string createdate { get; set; }
         public string lastlogin { get; set; }
         public Subscription[] subscriptions { get; set; }
+
+        private DateTime? ParseUnix(string value)
+        {
+            if (long.TryParse(value, out long ts))
+            {
+                return DateTimeOffset
+                    .FromUnixTimeSeconds(ts)
+                    .LocalDateTime;
+            }
+            return null;
+        }
+
+        public DateTime? CreationDate => ParseUnix(createdate);
+        public DateTime? LastLoginDate => ParseUnix(lastlogin);
+
+        public string CreationDateFormatted =>
+            CreationDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
+
+        public string LastLoginFormatted =>
+            LastLoginDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
     }
 
     public class Subscription
@@ -1314,6 +1334,51 @@ namespace AuthVaultix
         public string expiry { get; set; }
         public long timeleft { get; set; }
 
+        private long? ExpiryTimestamp
+        {
+            get
+            {
+                if (long.TryParse(expiry, out long ts))
+                    return ts;
+                return null;
+            }
+        }
+
+        public DateTime? ExpiryDate
+        {
+            get
+            {
+                if (ExpiryTimestamp == null) return null;
+
+                return DateTimeOffset
+                    .FromUnixTimeSeconds(ExpiryTimestamp.Value)
+                    .LocalDateTime;
+            }
+        }
+
+        public string ExpiryFormatted
+        {
+            get
+            {
+                return ExpiryDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
+            }
+        }
+
+        public string TimeLeft
+        {
+            get
+            {
+                if (ExpiryDate == null)
+                    return "N/A";
+
+                var diff = ExpiryDate.Value - DateTime.Now;
+
+                if (diff.TotalSeconds <= 0)
+                    return "Expired";
+
+                return $"{diff.Days}d {diff.Hours}h {diff.Minutes}m {diff.Seconds}s";
+            }
+        }
     }
 
     public class LoginResponse
