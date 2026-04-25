@@ -1010,7 +1010,7 @@ namespace AuthVaultix
                 using (WebClient client = new WebClient())
                 {
                     client.Proxy = null;
-
+                    client.Headers.Add("User-Agent", "AuthVaultixClient/1.0");
                     // SSL check
                     ServicePointManager.ServerCertificateValidationCallback += AssertSSL;
 
