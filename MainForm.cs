@@ -90,9 +90,9 @@ namespace Client
                 string logMsg;
                 if (!LoginForm.Client.Log(logDataField.Text, out logMsg))
                 {
-                    MessageBox.Show("Log failed: " + logMsg);
+                    MessageBox.Show(logMsg);
                 }
-                else { MessageBox.Show("Log failed: " + logMsg); }
+                else { MessageBox.Show(logMsg); }
             }
             catch (Exception ex)
             {
