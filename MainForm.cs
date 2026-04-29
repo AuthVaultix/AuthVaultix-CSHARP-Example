@@ -74,6 +74,7 @@ namespace Client
 
                 if (!LoginForm.Client.FetchOnline(out onlineUsers, out msg))
                 {
+                    MessageBox.Show(msg, "Error");
                     return;
                 }
                 onlineUsersField.Items.Clear();
@@ -151,18 +152,23 @@ namespace Client
 
         private void downloadFileBtn_Click(object sender, EventArgs e)
         {
-            byte[] bytes; string msg;
-            if (!LoginForm.Client.Download("", out bytes, out msg))
+            byte[] bytes;
+            string msg;
+
+            if (!LoginForm.Client.Download("823785F2", out bytes, out msg))
             {
-                File.WriteAllBytes(filePathField.Text + "\\" + fileExtensionField.Text, bytes);
                 MessageBox.Show(msg, "Download Failed");
                 return;
             }
-            else
+            if (bytes == null || bytes.Length == 0){MessageBox.Show("File data empty", "Error");return;}
+
+            try
             {
-                File.WriteAllBytes(Directory.GetCurrentDirectory() + "\\test.png", bytes);
+                string fullPath = Path.Combine(filePathField.Text, fileExtensionField.Text);
+                File.WriteAllBytes(fullPath, bytes);
                 MessageBox.Show("Downloaded " + bytes.Length + " bytes", "Success");
             }
+            catch (Exception ex){MessageBox.Show("File save error: " + ex.Message, "Error");}
         }
 
         private void fetchUserVarBtn_Click(object sender, EventArgs e)
@@ -234,6 +240,14 @@ namespace Client
                 var messages = await LoginForm.Client.ChatFetch(chatchannel);
 
                 chatroomGrid.Rows.Clear();
+
+                if (!string.IsNullOrEmpty(LoginForm.Client.LastResponseMessage) &&
+                    LoginForm.Client.LastResponseMessage != "OK")
+                {
+                    MessageBox.Show(LoginForm.Client.LastResponseMessage, "Chat Error");
+                    timer1.Stop();
+                    return;
+                }
 
                 if (messages == null || messages.Count == 0)
                 {
