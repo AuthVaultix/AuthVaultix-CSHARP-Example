@@ -21,8 +21,9 @@ namespace AuthVaultix
 {
     public class AuthVaultixClient
     {
-        private const string URL = "https://api.authvaultix.com/api/1.0/"; //apiUrl.TrimEnd('/') + "/"; 
-       
+
+        private const string URL = "https://authvaultix.com/api/1.0/"; //apiUrl.TrimEnd('/') + "/"; 
+
         private string AppName;
         private string OwnerId;
         private string Secret;
@@ -31,6 +32,15 @@ namespace AuthVaultix
 
         public AuthVaultixClient(string appName, string ownerId, string secret, string version)
         {
+            if (string.IsNullOrWhiteSpace(appName) || string.IsNullOrWhiteSpace(ownerId) || string.IsNullOrWhiteSpace(secret) || string.IsNullOrWhiteSpace(version))
+            {
+                Process.Start("https://youtu.be/rJ1x1fYiZoU?si=GffkGIAGupPHWa0x");
+                Process.Start("https://authvaultix.com/win/app/");
+                Thread.Sleep(2000);
+                ErrorHandler.Error("Application not setup correctly.\nPlease watch the YouTube video for setup.");
+                Environment.Exit(0);
+            }
+
             AppName = appName;
             OwnerId = ownerId;
             Secret = secret;
@@ -107,7 +117,6 @@ namespace AuthVaultix
 
             if (!json.success)
             {
-                // ❗ message sirf user ko show karne ke liye
                 RisponceCollection = json.message ?? "Login failed";
                 return false;
             }
@@ -171,12 +180,10 @@ namespace AuthVaultix
         Environment.FailFast(reason);  // Hard crash
     }
 
-
-
     // ======================
     // REGISTER
     // ======================
-    public bool Register(string username, string password, string licenseKey, string email = "")
+        public bool Register(string username, string password, string licenseKey, string email = "")
         {
             RisponceCollection = null;
 
@@ -206,9 +213,13 @@ namespace AuthVaultix
                 RisponceCollection = json.message;
                 return false;
             }
-
             CurrentUser = json.info;
-            SessionId = json.sessionid; // (if new session)
+
+            if (!string.IsNullOrWhiteSpace(json.sessionid))
+            {
+                SessionId = json.sessionid;
+            }
+
             return true;
         }
 
@@ -245,7 +256,12 @@ namespace AuthVaultix
 
 
             CurrentUser = json.info;
-            SessionId = json.sessionid; // if server rotate new session
+
+            if (!string.IsNullOrWhiteSpace(json.sessionid))
+            {
+                SessionId = json.sessionid;
+            }
+
             return true;
         }
 
@@ -583,6 +599,7 @@ namespace AuthVaultix
         // ======================
         public bool CheckBlacklist(out string serverMessage)
         {
+
             serverMessage = null;
 
             InitGuard.EnsureInitialized(Initialized);
@@ -753,7 +770,7 @@ namespace AuthVaultix
             }
 
             RisponceCollection = "OK";
-            return json.message;  // actual value
+            return json.message;  
         }
 
         // ======================
@@ -1010,7 +1027,9 @@ namespace AuthVaultix
                 using (WebClient client = new WebClient())
                 {
                     client.Proxy = null;
+
                     client.Headers.Add("User-Agent", "AuthVaultixClient/1.0");
+
                     // SSL check
                     ServicePointManager.ServerCertificateValidationCallback += AssertSSL;
 
@@ -1462,4 +1481,3 @@ public static class SID
         return sb.ToString();
     }
 }
-

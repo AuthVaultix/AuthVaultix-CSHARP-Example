@@ -51,7 +51,7 @@ namespace Client
 
             if (level == "vip")
             {
-                MessageBox.Show("⚠ Your update support has expired.\n\nPlease renew your subscription to continue receiving updates and support.","Support Expired",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                MessageBox.Show("⚠ Your update support has expired.\n\nPlease renew your subscription to continue receiving updates and support.", "Support Expired", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             else
             {
@@ -59,7 +59,7 @@ namespace Client
             }
 
             userDataField.Items.Add($"Username: {LoginForm.Client.CurrentUser.username}");
-            userDataField.Items.Add($"License: {LoginForm.Client.CurrentUser.subscriptions[0].key}");;
+            userDataField.Items.Add($"License: {LoginForm.Client.CurrentUser.subscriptions[0].key}"); ;
             userDataField.Items.Add($"Expires: {LoginForm.Client.CurrentUser.subscriptions[0].ExpiryFormatted}");
             userDataField.Items.Add($"Subscription: {LoginForm.Client.CurrentUser.subscriptions[0].subscription}");
             userDataField.Items.Add($"IP: {LoginForm.Client.CurrentUser.ip}");
@@ -74,14 +74,15 @@ namespace Client
 
                 if (!LoginForm.Client.FetchOnline(out onlineUsers, out msg))
                 {
-                    MessageBox.Show(msg, "Error");
+                    MessageBox.Show(msg, "Error"); // ✅ message show karo
                     return;
+
                 }
                 onlineUsersField.Items.Clear();
                 foreach (var user in onlineUsers)
-                onlineUsersField.Items.Add(user.credential);
+                    onlineUsersField.Items.Add(user.credential);
             }
-            catch (Exception ex){MessageBox.Show("Status: " + ex.Message);}
+            catch (Exception ex) { Console.WriteLine("Status: " + ex.Message); }
         }
 
         private void sendLogDataBtn_Click(object sender, EventArgs e)
@@ -108,7 +109,7 @@ namespace Client
             {
                 MessageBox.Show(msg, "Banned");
                 MessageBox.Show("Please reopen this program");
-                Application.Exit(); // better than Environment.Exit(0) for WinForms
+                Environment.Exit(0); 
                 return;
             }
             else{MessageBox.Show(msg, "Ban Failed");}
@@ -155,7 +156,7 @@ namespace Client
             byte[] bytes;
             string msg;
 
-            if (!LoginForm.Client.Download("823785F2", out bytes, out msg))
+            if (!LoginForm.Client.Download("", out bytes, out msg))
             {
                 MessageBox.Show(msg, "Download Failed");
                 return;
@@ -241,6 +242,7 @@ namespace Client
 
                 chatroomGrid.Rows.Clear();
 
+                // ✅ error show karo
                 if (!string.IsNullOrEmpty(LoginForm.Client.LastResponseMessage) &&
                     LoginForm.Client.LastResponseMessage != "OK")
                 {
@@ -248,6 +250,7 @@ namespace Client
                     timer1.Stop();
                     return;
                 }
+
 
                 if (messages == null || messages.Count == 0)
                 {

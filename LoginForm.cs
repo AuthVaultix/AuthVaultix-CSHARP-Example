@@ -1,12 +1,5 @@
 using AuthVaultix;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Client
@@ -18,7 +11,7 @@ namespace Client
             appName: "",
             ownerId: "",
             secret: "",
-            version: ""
+            version: "1.0"
         );
 
         public LoginForm()
@@ -48,7 +41,7 @@ namespace Client
                 main.Show();
                 this.Hide();
             }
-            catch (Exception ex){MessageBox.Show(ex.Message, "Error");}
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Error"); }
         }
 
         private void RegisterBtn_Click(object sender, EventArgs e)
@@ -98,7 +91,7 @@ namespace Client
                 }
                 MessageBox.Show("Upgrade successful!", "Success");
             }
-            catch (Exception ex){MessageBox.Show("" + ex.Message);}
+            catch (Exception ex) { MessageBox.Show("" + ex.Message); }
         }
 
         private void forgotBtn_Click(object sender, EventArgs e)
@@ -112,7 +105,7 @@ namespace Client
                 }
                 MessageBox.Show("Reset email sent successfully", "Success");
             }
-            catch (Exception ex){MessageBox.Show("" + ex.Message);}
+            catch (Exception ex) { MessageBox.Show("" + ex.Message); }
         }
 
         private void closeBtn_Click(object sender, EventArgs e)
@@ -126,4 +119,3 @@ namespace Client
         }
     }
 }
-
