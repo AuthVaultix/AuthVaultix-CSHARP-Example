@@ -177,7 +177,8 @@ namespace AuthVaultix
 
     private void KillNow(string reason)
     {
-        Environment.FailFast(reason);  // Hard crash
+       MessageBox.Show(reason, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+       Environment.Exit(0);
     }
 
     // ======================
