@@ -58,32 +58,38 @@ namespace AuthVaultix
             string sentKey = GenerateIV();
             EncKey = sentKey + "-" + Secret;
 
+            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string exeHash = GetFileHash(exePath);
+
             var data = new NameValueCollection
             {
                 ["type"] = "init",
                 ["name"] = AppName,
                 ["ownerid"] = OwnerId,
                 ["ver"] = Version,
-                ["enckey"] = sentKey
+                ["enckey"] = sentKey,
+                ["hash"] = exeHash
             };
 
             string response = Request(ApiUrl, data, out _);
 
             if (response == "Authvaultix_Invalid")
             {
-                RisponceCollection = "Application not found";
-                return false;
+                KillNow("App not found");
             }
 
             var json = JsonConvert.DeserializeObject<InitResponse>(response);
 
-            if (!json.success)
+            if (json == null)
             {
-                RisponceCollection = json.message ?? "Initialization failed2";
-                return false;
+                KillNow("Invalid JSON");
             }
 
-            
+            if (!json.success)
+            {
+                KillNow(json.message);
+            }
+
             SessionId = json.sessionid;
             Initialized = true;
 
@@ -1189,6 +1195,16 @@ namespace AuthVaultix
                 {
                     ErrorHandler.Error("SDK not initialized.\nCall Client.Init() before using any API.");
                 }
+            }
+        }
+        
+        public static string GetFileHash(string filePath)
+        {
+            using (var sha256 = SHA256.Create())
+            using (var stream = File.OpenRead(filePath))
+            {
+                var hash = sha256.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
         }
 
