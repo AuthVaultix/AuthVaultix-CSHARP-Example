@@ -8,11 +8,12 @@ using System.Globalization;
 using System.IO;
 using System.Management;
 using System.Net;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -21,1316 +22,47 @@ namespace AuthVaultix
 {
     public class AuthVaultixClient
     {
-
-        private const string URL = "https://authvaultix.com/api/1.0/"; //apiUrl.TrimEnd('/') + "/"; 
-
-        private string AppName;
-        private string OwnerId;
-        private string Secret;
-        private string ApiUrl;
-        private string Version;
+        private readonly AuthVaultixCore _core;
 
         public AuthVaultixClient(string appName, string ownerId, string secret, string version)
         {
-            if (string.IsNullOrWhiteSpace(appName) || string.IsNullOrWhiteSpace(ownerId) || string.IsNullOrWhiteSpace(secret) || string.IsNullOrWhiteSpace(version))
-            {
-                Process.Start("https://youtu.be/rJ1x1fYiZoU?si=GffkGIAGupPHWa0x");
-                Process.Start("https://authvaultix.com/win/app/");
-                Thread.Sleep(2000);
-                ErrorHandler.Error("Application not setup correctly.\nPlease watch the YouTube video for setup.");
-                Environment.Exit(0);
-            }
-
-            AppName = appName;
-            OwnerId = ownerId;
-            Secret = secret;
-            Version = version;
-            ApiUrl = URL;
+            _core = new AuthVaultixCore(appName, ownerId, secret, version);
         }
 
-        public string RisponceCollection { get; private set; } = "";
-        public bool Init()
-        {
-            RisponceCollection = "Initialization failed1";
+        public string RisponceCollection => _core.RisponceCollection;
+        public string LastMessage1 => _core.LastMessage1;
+        public string LastMessage => _core.LastMessage;
+        public string LastResponseMessage => _core.LastResponseMessage;
+        public UserInfo CurrentUser => _core.CurrentUser;
+        public UserInfo UserData => _core.UserData;
+        public bool UseFullKey => _core.UseFullKey;
+        public string SessionId => _core.SessionId;
+        public bool Initialized => _core.Initialized;
 
-            if (Initialized) return true;
-
-            string sentKey = GenerateIV();
-            EncKey = sentKey + "-" + Secret;
-
-            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string exeHash = GetFileHash(exePath);
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "init",
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId,
-                ["ver"] = Version,
-                ["enckey"] = sentKey,
-                ["hash"] = exeHash
-            };
-
-            string response = Request(ApiUrl, data, out _);
-
-            if (response == "Authvaultix_Invalid")
-            {
-                KillNow("App not found");
-            }
-
-            var json = JsonConvert.DeserializeObject<InitResponse>(response);
-
-            if (json == null)
-            {
-                KillNow("Invalid JSON");
-            }
-
-            if (!json.success)
-            {
-                KillNow(json.message);
-            }
-
-            SessionId = json.sessionid;
-            Initialized = true;
-
-            Console.WriteLine("Session Initialized: " + SessionId);
-            return true;
-        }
-
-        // ======================
-        // LOGIN
-        // ======================
-        public bool Login(string username, string password)
-        {
-            RisponceCollection = null;
-            InitGuard.EnsureInitialized(Initialized);
-
-            string hwid = SID.Get();
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "login",
-                ["username"] = username,
-                ["pass"] = password,
-                ["hwid"] = hwid,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out _);
-            var json = JsonConvert.DeserializeObject<Response>(response);
-
-            if (!json.success)
-            {
-                RisponceCollection = json.message ?? "Login failed";
-                return false;
-            }
-
-            CurrentUser = json.info;
-
-            // Don't overwrite SessionId if login response doesn't include it
-            if (!string.IsNullOrWhiteSpace(json.sessionid))
-                SessionId = json.sessionid;
-
-            return true;
-
-        }
-
-        // ======================
-        // CHECK SESSION
-        // ======================
-      
-    public bool Check()
-    {
-        RisponceCollection = null;
-        InitGuard.EnsureInitialized(Initialized);
-
-        if (string.IsNullOrWhiteSpace(SessionId))
-            KillNow("Session missing");
-
-        var data = new NameValueCollection
-        {
-            ["type"] = "check",
-            ["sessionid"] = SessionId,
-            ["name"] = AppName,
-            ["ownerid"] = OwnerId
-        };
-
-        string response = Request(ApiUrl, data, out string signature);
-
-        if (response == null)
-            KillNow("Connection failed");
-
-        if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
-            KillNow("Invalid response format");
-
-        var json = JsonConvert.DeserializeObject<CheckResponse>(response);
-
-        if (json == null)
-            KillNow("Invalid JSON");
-
-        if (!json.success)
-            KillNow(json.message ?? "Session check failed");
-
-
-        RisponceCollection = json.message;
-        LastMessage = RisponceCollection;
-        LastMessage1 = RisponceCollection;
-
-        return true;
+        public bool Init() => _core.InitializeContext();
+        public bool Login(string username, string password) => _core.AuthenticateUser(username, password);
+        public bool Check() => _core.ValidateSession();
+        public bool Register(string username, string password, string licenseKey, string email = "") => _core.RegisterAccount(username, password, licenseKey, email);
+        public bool LicenseLogin(string licenseKey) => _core.LicenseAccess(licenseKey);
+        public bool Log(string message, out string serverMessage) => _core.SendLog(message, out serverMessage);
+        public bool Download(string fileId, out byte[] fileBytes, out string serverMessage) => _core.RetrieveFile(fileId, out fileBytes, out serverMessage);
+        public bool FetchOnline(out List<OnlineUser> users, out string serverMessage) => _core.GetOnlineClients(out users, out serverMessage);
+        public bool Ban(string reason, out string serverMessage) => _core.EnforceBan(reason, out serverMessage);
+        public void Logout() => _core.TerminateSession();
+        public void ChangeUsername(string newUsername) => _core.UpdateUsername(newUsername);
+        public bool CheckBlacklist(out string serverMessage) => _core.VerifyBlacklist(out serverMessage);
+        public bool ForgotPassword(string username, string email) => _core.TriggerPasswordReset(username, email);
+        public bool Upgrade(string username, string licenseKey) => _core.ApplyUpgrade(username, licenseKey);
+        public string GetGlobalVar(string varKey) => _core.FetchGlobalVariable(varKey);
+        public string GetVar(string varName) => _core.FetchUserVariable(varName);
+        public bool SetVar(string varName, string value) => _core.UpdateUserVariable(varName, value);
+        public bool ChatSend(string message, string channel, out string serverMessage) => _core.TransmitChatMessage(message, channel, out serverMessage);
+        public Task<List<ChatMessage>> ChatFetch(string channel) => _core.RetrieveChatHistory(channel);
     }
 
-    private void KillNow(string reason)
-    {
-       MessageBox.Show(reason, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-       Environment.Exit(0);
-    }
-
-    // ======================
-    // REGISTER
-    // ======================
-        public bool Register(string username, string password, string licenseKey, string email = "")
-        {
-            RisponceCollection = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            string hwid = SID.Get();
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "register",
-                ["username"] = username,
-                ["pass"] = password,
-                ["key"] = licenseKey,
-                ["email"] = email,
-                ["hwid"] = hwid,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out _);
-
-            var json = JsonConvert.DeserializeObject<LoginResponse>(response);
-
-            if (!json.success)
-            {
-                RisponceCollection = json.message;
-                return false;
-            }
-            CurrentUser = json.info;
-
-            if (!string.IsNullOrWhiteSpace(json.sessionid))
-            {
-                SessionId = json.sessionid;
-            }
-
-            return true;
-        }
-
-
-        // ======================
-        // LICENSE LOGIN/AUTO REGISTER
-        // ======================
-        public bool LicenseLogin(string licenseKey)
-        {
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            string hwid = SID.Get();
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "license",
-                ["key"] = licenseKey,
-                ["hwid"] = hwid,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out _);
-
-            var json = JsonConvert.DeserializeObject<LoginResponse>(response);
-
-            if (!json.success)
-            {
-                RisponceCollection = json.message;
-                return false;
-            }
-
-
-            CurrentUser = json.info;
-
-            if (!string.IsNullOrWhiteSpace(json.sessionid))
-            {
-                SessionId = json.sessionid;
-            }
-
-            return true;
-        }
-
-        // ======================
-        // LOG
-        // ======================
-        public bool Log(string message, out string serverMessage)
-        {
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "log",
-                ["message"] = message,
-                ["pcuser"] = Environment.UserName,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            // Request can return null if it error/exits in your current design
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Log request failed (no response).";
-                return false;
-            }
-
-            
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<BasicResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response";
-                return false;
-            }
-
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Log failed";
-                return false;
-            }
-
-            LastMessage = json.message;
-            serverMessage = json.message; // optional: success msg
-            return true;
-        }
-
-
-        // ======================
-        // DOWNLOAD FILE
-        // ======================
-        public bool Download(string fileId, out byte[] fileBytes, out string serverMessage)
-        {
-            fileBytes = null;
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(fileId))
-            {
-                serverMessage = "Invalid file id.";
-                return false;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "file",
-                ["fileid"] = fileId,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Download request failed (no response).";
-                return false;
-            }
-
-           
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<DownloadResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response";
-                return false;
-            }
-
-            LastMessage = json.message;
-            LastMessage1 = json.message;
-
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Download failed";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(json.contents))
-            {
-                serverMessage = "File content missing";
-                return false;
-            }
-
-            try
-            {
-                fileBytes = Convert.FromBase64String(json.contents);
-                serverMessage = json.message ?? "Download successful";
-                return true;
-            }
-            catch (FormatException)
-            {
-                serverMessage = "Invalid file encoding (base64)";
-                return false;
-            }
-        }
-
-        // ======================
-        // FETCH ONLINE USERS
-        // ======================
-        public bool FetchOnline(out List<OnlineUser> users, out string serverMessage)
-        {
-            users = null;
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "fetchonline",
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Request failed. Please try again.";
-                return false;
-            }
-
-            
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<FetchOnlineResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response.";
-                return false;
-            }
-
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Failed to fetch online users.";
-                return false;
-            }
-
-
-            users = json.users ?? new List<OnlineUser>();
-            serverMessage = json.message ?? "OK";
-            return true;
-        }
-
-        // ======================
-        // BAN USER (SELF BAN / CURRENT SESSION)
-        // ======================
-        public bool Ban(string reason, out string serverMessage)
-        {
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(reason))
-                reason = "No reason provided";
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "ban",
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId,
-                ["reason"] = reason
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Request failed. Please try again.";
-                return false;
-            }
-
-
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<BanResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response";
-                return false;
-            }
-
-            LastMessage = json.message;
-            LastMessage1 = json.message;
-
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Ban failed";
-                return false;
-            }
-
-
-            serverMessage = json.message ?? "Banned";
-            return true;
-        }
-
-        // ======================
-        // LOGOUT
-        // ======================
-        public void Logout()
-        {
-            InitGuard.EnsureInitialized(Initialized);
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "logout",
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            var json = JsonConvert.DeserializeObject<LogoutResponse>(response);
-
-            if (!json.success)
-                throw new Exception(json.message);
-
-            SessionId = null;
-            Initialized = false;
-
-            Console.WriteLine("Logged out successfully");
-        }
-        // ======================
-        // CHANGE USERNAME
-        // ======================
-        public void ChangeUsername(string newUsername)
-        {
-            InitGuard.EnsureInitialized(Initialized);
-
-            if (string.IsNullOrWhiteSpace(newUsername))
-                throw new Exception("New username cannot be empty");
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "changeusername",
-                ["sessionid"] = SessionId,
-                ["newUsername"] = newUsername,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            var json = JsonConvert.DeserializeObject<ChangeUsernameResponse>(response);
-
-            if (!json.success)
-                throw new Exception(json.message);
-
-            SessionId = null;
-            Initialized = false;
-
-            Console.WriteLine("Username changed successfully, user logged out.");
-        }
-        // ======================
-        // CHECK BLACKLIST
-        // ======================
-        public bool CheckBlacklist(out string serverMessage)
-        {
-
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            string hwid = SID.Get();
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "checkblacklist",
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId,
-                ["hwid"] = hwid
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Request failed. Please try again.";
-                return false;
-            }
-
-            
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<BlacklistResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response";
-                return false;
-            }
-
-            LastMessage = json.message;
-            LastMessage1 = json.message;
-
-            if (!json.success)
-            {
-                serverMessage = json.message ?? "Client is blacklisted";
-                return false;
-            }
-
-            serverMessage = json.message ?? "Client is not blacklisted";
-            return true;
-        }
-
-        // ======================
-        // FORGOT PASSWORD
-        // ======================
-        public bool ForgotPassword(string username, string email)
-        {
-            InitGuard.EnsureInitialized(Initialized);
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "forgot",
-                ["username"] = username,
-                ["email"] = email,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out _);
-
-            var json = JsonConvert.DeserializeObject<ForgotPasswordResponse>(response);
-
-            if (!json.success)
-            {
-                RisponceCollection = json.message;
-                return false;
-            }
-
-            Console.WriteLine("Reset email sent successfully");
-            return true;
-        }
-
-        // ======================
-        // UPGRADE
-        // ======================
-        public bool Upgrade(string username, string licenseKey)
-        {
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "upgrade",
-                ["username"] = username,
-                ["key"] = licenseKey,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out _);
-
-            var json = JsonConvert.DeserializeObject<UpgradeResponse>(response);
-
-            if (!json.success)
-            {
-                RisponceCollection = json.message;
-                return false;
-            }
-
-
-            Console.WriteLine("Upgrade successful: " + json.users[0].name);
-            return true;
-        }
-
-        // ======================
-        // GET GLOBAL VAR
-        // ======================
-        public string GetGlobalVar(string varKey)
-        {
-            RisponceCollection = "";
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                RisponceCollection = "Session missing. Please login again.";
-                return null;
-            }
-
-            if (string.IsNullOrWhiteSpace(varKey))
-            {
-                RisponceCollection = "Invalid variable key.";
-                return null;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "var",
-                ["sessionid"] = SessionId,
-                ["varid"] = varKey,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string sig;
-            string response = Request(ApiUrl, data, out sig);
-
-            if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
-            {
-                RisponceCollection = "Invalid server response.";
-                return null;
-            }
-
-            var json = JsonConvert.DeserializeObject<GlobalVarResponse>(response);
-
-            if (json == null || !json.success)
-            {
-                RisponceCollection = json?.message ?? "Failed to fetch variable.";
-                return null;
-            }
-
-            RisponceCollection = "OK";
-            return json.message;  
-        }
-
-        // ======================
-        // GET USER VARIABLE
-        // ======================
-        public string GetVar(string varName)
-        {
-            RisponceCollection = "";
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                RisponceCollection = "Session missing. Please login again.";
-                return null;
-            }
-
-            if (string.IsNullOrWhiteSpace(varName))
-            {
-                RisponceCollection = "Invalid variable name.";
-                return null;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "getvar",
-                ["var"] = varName,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string sig;
-            string response = Request(ApiUrl, data, out sig);
-
-            if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
-            {
-                RisponceCollection = response?.Trim() ?? "Request failed.";
-                return null;
-            }
-
-            var json = JsonConvert.DeserializeObject<GetVarResponse>(response);
-
-            if (json == null || !json.success)
-            {
-                RisponceCollection = json?.message ?? "Failed to get variable.";
-                return null;
-            }
-
-            RisponceCollection = json.message ?? "OK";
-            return json.response; 
-        }
-        // ======================
-        // SET USER VARIABLE
-        // ======================
-        public bool SetVar(string varName, string value)
-        {
-            RisponceCollection = "";
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                RisponceCollection = "Session missing. Please login again.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(varName))
-            {
-                RisponceCollection = "Invalid variable name.";
-                return false;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "setvar",
-                ["var"] = varName,
-                ["data"] = value ?? string.Empty,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string sig;
-            string response = Request(ApiUrl, data, out sig);
-
-            if (string.IsNullOrWhiteSpace(response) || response[0] != '{')
-            {
-                RisponceCollection = response?.Trim() ?? "Request failed.";
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<BasicResponse>(response);
-
-            if (json == null)
-            {
-                RisponceCollection = "Invalid server response.";
-                return false;
-            }
-
-            RisponceCollection = json.message ?? (json.success ? "OK" : "Failed");
-            LastMessage = RisponceCollection;
-            LastMessage1 = RisponceCollection;
-
-            return json.success;
-        }
-
-
-        // ======================
-        // CHAT SEND
-        // ======================
-        public bool ChatSend(string message, string channel, out string serverMessage)
-        {
-            serverMessage = null;
-
-            InitGuard.EnsureInitialized(Initialized);
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                serverMessage = "Session missing. Please login again.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                serverMessage = "Message cannot be empty.";
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(channel))
-            {
-                serverMessage = "Invalid channel.";
-                return false;
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "chatsend",
-                ["message"] = message,
-                ["channel"] = channel,
-                ["sessionid"] = SessionId,
-                ["name"] = AppName,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                serverMessage = "Request failed. Please try again.";
-                return false;
-            }
-
-            if (response[0] != '{')
-            {
-                serverMessage = response.Trim();
-                LastResponseMessage = serverMessage;
-                return false;
-            }
-
-            var json = JsonConvert.DeserializeObject<ChatResponse>(response);
-
-            if (json == null)
-            {
-                serverMessage = "Invalid server response.";
-                return false;
-            }
-
-            LastResponseMessage = json.message;
-
-            if (!json.success)
-            {
-                // 🔥 Muted special message
-                if (json.code == 403 && json.remaining_seconds > 0)
-                {
-                    serverMessage = $"Muted till {json.muted_until} (wait {json.remaining_human})";
-                    LastResponseMessage = serverMessage;
-                    return false;
-                }
-
-                serverMessage = json.message ?? "Failed to send message.";
-                return false;
-            }
-
-            serverMessage = json.message ?? "Message sent.";
-            return true;
-        }
-
-
-
-
-        public Task<List<ChatMessage>> ChatFetch(string channel)
-        {
-            InitGuard.EnsureInitialized(Initialized);
-
-            LastResponseMessage = null;
-
-            if (string.IsNullOrWhiteSpace(SessionId))
-            {
-                LastResponseMessage = "Session missing. Please login again.";
-                return Task.FromResult(new List<ChatMessage>());
-            }
-
-            if (string.IsNullOrWhiteSpace(channel))
-            {
-                LastResponseMessage = "Invalid channel.";
-                return Task.FromResult(new List<ChatMessage>());
-            }
-
-            var data = new NameValueCollection
-            {
-                ["type"] = "chatfetch",
-                ["channel"] = channel,
-                ["sessionid"] = SessionId,
-                ["ownerid"] = OwnerId
-            };
-
-            string response = Request(ApiUrl, data, out string signature);
-
-            if (string.IsNullOrWhiteSpace(response))
-            {
-                LastResponseMessage = "Request failed. Please try again.";
-                return Task.FromResult(new List<ChatMessage>());
-            }
-
-            if (response[0] != '{')
-            {
-                LastResponseMessage = response.Trim();
-                return Task.FromResult(new List<ChatMessage>());
-            }
-
-            var json = JsonConvert.DeserializeObject<ChatFetchResponse>(response);
-
-            if (json == null)
-            {
-                LastResponseMessage = "Invalid server response.";
-                return Task.FromResult(new List<ChatMessage>());
-            }
-
-            if (!json.success)
-            {
-                LastResponseMessage = json.message ?? "Failed to fetch chat messages.";
-                return Task.FromResult(new List<ChatMessage>());
-            }
-
-            LastResponseMessage = json.message ?? "OK";
-            return Task.FromResult(json.messages ?? new List<ChatMessage>());
-        }
-
-        private string Request(string url, NameValueCollection data, out string signature)
-        {
-            try
-            {
-                using (WebClient client = new WebClient())
-                {
-                    client.Proxy = null;
-
-                    client.Headers.Add("User-Agent", "AuthVaultixClient/1.0");
-
-                    // SSL check
-                    ServicePointManager.ServerCertificateValidationCallback += AssertSSL;
-
-                    byte[] raw = client.UploadValues(url, data);
-
-                    string response = Encoding.UTF8.GetString(raw);
-                    signature = client.ResponseHeaders["signature"];
-
-                    ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-                    string type = data["type"];
-                    if (!VerifySignature(response, signature, type))
-                    {
-                        ErrorHandler.Error("Signature verification failed. Request tampered");
-                        // ErrorHandler already does Environment.Exit(0)
-                        return null;
-                    }
-
-                    return response;
-                }
-            }
-            catch (WebException webex)
-            {
-                if (webex.Response is HttpWebResponse resp)
-                {
-                    switch (resp.StatusCode)
-                    {
-                        case (HttpStatusCode)429:
-                            ErrorHandler.Error("You're connecting too fast, slow down.");
-                            break;
-                        default:
-                            ErrorHandler.Error("Connection failure. Please try again later.");
-                            break;
-                    }
-                }
-                else
-                {
-                    ErrorHandler.Error("Network error. Check internet or firewall.");
-                }
-
-                signature = null;
-                return null;
-            }
-        }
-
-        private static bool AssertSSL
-        (
-            object sender,
-            System.Security.Cryptography.X509Certificates.X509Certificate certificate,
-            System.Security.Cryptography.X509Certificates.X509Chain chain,
-            System.Net.Security.SslPolicyErrors sslPolicyErrors)
-        {
-            if ((!certificate.Issuer.Contains("Cloudflare") && !certificate.Issuer.Contains("Google") && !certificate.Issuer.Contains("Let's Encrypt")) || sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
-            {
-                ErrorHandler.Error("SSL assertion failed. Possible MITM or proxy.");
-                return false;
-            }
-            return true;
-        }
-
-        private bool VerifySignature(string body, string serverSignature, string type)
-        {
-            if (type == "log" || type == "file")
-                return true;
-
-            if (string.IsNullOrEmpty(serverSignature))
-                return false;
-
-            string signKey = (type == "init")
-                ? EncKey.Substring(17, 64)
-                : EncKey;
-
-            string localSig = HashHMAC(signKey, body);
-            return FixedTimeEquals.CheckStringsFixedTime(localSig, serverSignature);
-        }
-
-        public static class ErrorHandler
-        {
-            [DllImport("kernel32.dll")]
-            private static extern bool AllocConsole();
-
-            private static readonly string LogFile = "error_logs.txt";
-
-            public static void Error(string msg)
-            {
-                AllocConsole();
-                var stdOut = Console.OpenStandardOutput();
-                var writer = new StreamWriter(stdOut) { AutoFlush = true };
-                Console.SetOut(writer);
-                Console.SetError(writer);
-
-                try
-                {
-                    string log = "==============================\n" + "TIME: " + DateTime.Now + "\n" + "ERROR: " + msg + "\n" + "==============================\n\n";
-                    File.AppendAllText(LogFile, log);
-                }
-                catch { }
-
-                Console.Title = "AuthVaultix - Error";
-                Console.ForegroundColor = ConsoleColor.Red;
-
-                Console.WriteLine("=======================================");
-                Console.WriteLine("AUTHVAULTIX ERROR");
-                Console.WriteLine("=======================================");
-                Console.WriteLine(msg);
-                Console.WriteLine("=======================================");
-                Console.ResetColor();
-                Console.WriteLine();
-                for (int i = 4; i >= 1; i--)
-                {
-                    Console.Write($"\rExiting in {i} seconds...");
-                    Thread.Sleep(1000);
-                }
-
-                Environment.Exit(0);
-            }
-        }
-
-        public static class FixedTimeEquals
-        {
-            public static bool CheckStringsFixedTime(string str1, string str2)
-            {
-                if (str1.Length != str2.Length)
-                    return false;
-
-                int result = 0;
-                for (int i = 0; i < str1.Length; i++)
-                    result |= str1[i] ^ str2[i];
-
-                return result == 0;
-            }
-        }
-
-        private static string HashHMAC(string key, string data)
-        {
-            using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
-            {
-                byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-                return BitConverter.ToString(hash).Replace("-", "").ToLower();
-            }
-        }
-
-        // ======================
-        // UTILS
-        // ======================
-        private static string GenerateIV()
-        {
-            return Guid.NewGuid().ToString("N").Substring(0, 16);
-        }
-
-        public static class InitGuard
-        {
-            public static void EnsureInitialized(bool initialized)
-            {
-                if (!initialized)
-                {
-                    ErrorHandler.Error("SDK not initialized.\nCall Client.Init() before using any API.");
-                }
-            }
-        }
-        
-        public static string GetFileHash(string filePath)
-        {
-            using (var sha256 = SHA256.Create())
-            using (var stream = File.OpenRead(filePath))
-            {
-                var hash = sha256.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLower();
-            }
-        }
-
-        public string LastMessage1 { get; private set; }
-        public UserInfo CurrentUser { get; private set; }
-        public string LastMessage { get; private set; }
-        public string LastResponseMessage { get; private set; }
-        public UserInfo UserData { get; private set; }
-        public bool UseFullKey { get; private set; }
-        public string SessionId { get; private set; }
-        public bool Initialized { get; private set; }
-
-        private string EncKey;
-
-    }
-    public class BasicResponse
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-    }
-
-    public class DownloadResponse   //download deta 
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public string contents { get; set; }
-    }
-
-    public class CheckResponse //session cheack 
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public string role { get; set; }
-    }
-
-    public class GetVarResponse //get user variable & set user variable
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public string response { get; set; }
-    }
-
-    public class FetchOnlineResponse //feach online user risponce 
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public List<OnlineUser> users { get; set; }
-    }
-
-    public class OnlineUser //feach online user 
+    public class OnlineUser
     {
         public string credential { get; set; }
-    }
-
-    public class BanResponse //ban login user
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-    }
-
-    public class LogoutResponse //logout & kill session & exit application
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-    }
-
-    public class ChangeUsernameResponse // change uername
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-    }
-
-    public class BlacklistResponse // mlacklst risponce
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-    }
-
-    public class ForgotPasswordResponse // forgot pass risponce
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-    }
-
-    public class UpgradeResponse // UpgradeUser risponce
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public UpgradeUser[] users { get; set; }
-    }
-
-    public class UpgradeUser // UpgradeUser risponce
-    {
-        public string name { get; set; } // subscription name
-    }
-
-    public class GlobalVarResponse //GlobalVar
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-    }
-
-    public class ChatResponse //ChatResponse
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public int code { get; set; }
-        public string ownerid { get; set; }
-
-        public string muted_until { get; set; }
-        public long muted_until_ts { get; set; }
-        public int remaining_seconds { get; set; }
-        public int remaining_minutes { get; set; }
-        public string remaining_human { get; set; }
-
-        public string server_time { get; set; }
-        public long server_time_ts { get; set; }
-    }
-
-
-    public class Response
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public UserInfo info { get; set; }
-        public string sessionid { get; set; }
     }
 
     public class UserInfo
@@ -1345,22 +77,14 @@ namespace AuthVaultix
         private DateTime? ParseUnix(string value)
         {
             if (long.TryParse(value, out long ts))
-            {
-                return DateTimeOffset
-                    .FromUnixTimeSeconds(ts)
-                    .LocalDateTime;
-            }
+                return DateTimeOffset.FromUnixTimeSeconds(ts).LocalDateTime;
             return null;
         }
 
         public DateTime? CreationDate => ParseUnix(createdate);
         public DateTime? LastLoginDate => ParseUnix(lastlogin);
-
-        public string CreationDateFormatted =>
-            CreationDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
-
-        public string LastLoginFormatted =>
-            LastLoginDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
+        public string CreationDateFormatted => CreationDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
+        public string LastLoginFormatted => LastLoginDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
     }
 
     public class Subscription
@@ -1370,59 +94,19 @@ namespace AuthVaultix
         public string expiry { get; set; }
         public long timeleft { get; set; }
 
-        private long? ExpiryTimestamp
-        {
-            get
-            {
-                if (long.TryParse(expiry, out long ts))
-                    return ts;
-                return null;
-            }
-        }
-
-        public DateTime? ExpiryDate
-        {
-            get
-            {
-                if (ExpiryTimestamp == null) return null;
-
-                return DateTimeOffset
-                    .FromUnixTimeSeconds(ExpiryTimestamp.Value)
-                    .LocalDateTime;
-            }
-        }
-
-        public string ExpiryFormatted
-        {
-            get
-            {
-                return ExpiryDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
-            }
-        }
-
+        private long? ExpiryTimestamp => long.TryParse(expiry, out long ts) ? ts : (long?)null;
+        public DateTime? ExpiryDate => ExpiryTimestamp.HasValue ? DateTimeOffset.FromUnixTimeSeconds(ExpiryTimestamp.Value).LocalDateTime : (DateTime?)null;
+        public string ExpiryFormatted => ExpiryDate?.ToString("dd/MM/yyyy hh:mm tt") ?? "Invalid date";
         public string TimeLeft
         {
             get
             {
-                if (ExpiryDate == null)
-                    return "N/A";
-
+                if (ExpiryDate == null) return "N/A";
                 var diff = ExpiryDate.Value - DateTime.Now;
-
-                if (diff.TotalSeconds <= 0)
-                    return "Expired";
-
+                if (diff.TotalSeconds <= 0) return "Expired";
                 return $"{diff.Days}d {diff.Hours}h {diff.Minutes}m {diff.Seconds}s";
             }
         }
-    }
-
-    public class LoginResponse
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public UserInfo info { get; set; }
-        public string sessionid { get; set; }
     }
 
     public class ChatMessage
@@ -1433,68 +117,963 @@ namespace AuthVaultix
         public long timestamp { get; set; }
     }
 
-    public class ChatFetchResponse
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public List<ChatMessage> messages { get; set; }
-    }
-
-    public class InitResponse
-    {
-        public bool success { get; set; }
-        public string message { get; set; }
-        public string sessionid { get; set; }
-        public string ownerid { get; set; }
-        public AppInfo appinfo { get; set; }
-    }
-
     public class AppInfo
     {
         public string version { get; set; }
         public string customerPanelLink { get; set; }
     }
-}
-public static class SID
-{
-    public static string Get()
+
+    public class UpgradeUser
     {
-        string machine = Environment.MachineName;
-        string user = Environment.UserName;
-        string domain = Environment.UserDomainName;
-        string os = Environment.OSVersion.VersionString;
-        string arch = Environment.Is64BitOperatingSystem ? "x64" : "x86";
-        string clr = Environment.Version.ToString();
-        string culture = CultureInfo.CurrentCulture.Name;
-        string sid = WindowsIdentity.GetCurrent().User.Value;
-        string raw = string.Join("|", machine, user, domain, os, arch, clr, culture, sid);
-        return Sha256Pretty(raw);
+        public string name { get; set; }
     }
 
-    private static string Sha256Pretty(string input)
+    internal class AuthVaultixCore
     {
-        using (var sha = SHA256.Create())
+        private readonly string _appName;
+        private readonly string _ownerId;
+        private readonly string _secret;
+        private readonly string _version;
+        private readonly string _apiUrl = "https://authvaultix.com/api/1.0/";
+
+        public string RisponceCollection { get; internal set; } = "";
+        public string LastMessage1 { get; internal set; }
+        public string LastMessage { get; internal set; }
+        public string LastResponseMessage { get; internal set; }
+        public UserInfo CurrentUser { get; internal set; }
+        public UserInfo UserData { get; internal set; }
+        public bool UseFullKey { get; internal set; }
+        public string SessionId { get; internal set; }
+        public bool Initialized { get; internal set; }
+
+        private string _encryptionKey;
+
+        public AuthVaultixCore(string appName, string ownerId, string secret, string version)
         {
-            byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
-            StringBuilder sb = new StringBuilder();
+            if (string.IsNullOrWhiteSpace(appName) || string.IsNullOrWhiteSpace(ownerId) || string.IsNullOrWhiteSpace(secret) || string.IsNullOrWhiteSpace(version))
+            {
+                Process.Start("https://youtu.be/rJ1x1fYiZoU?si=GffkGIAGupPHWa0x");
+                Process.Start("https://authvaultix.com/win/app/");
+                Thread.Sleep(2000);
+                Diagnostics.Crash("Application not setup correctly.\nPlease watch the YouTube video for setup.");
+            }
+            _appName = appName;
+            _ownerId = ownerId;
+            _secret = secret;
+            _version = version;
+        }
 
-            foreach (byte b in bytes)
-                sb.Append(b.ToString("X2"));
+        private void EnsureReady()
+        {
+            if (!Initialized) Diagnostics.Crash("SDK not initialized.\nCall Client.Init() before using any API.");
+        }
 
-            return SplitEvery(sb.ToString(), 4, "-");
+        public bool InitializeContext()
+        {
+            RisponceCollection = "Initialization failed1";
+            if (Initialized) return true;
+
+            string iv = Guid.NewGuid().ToString("N").Substring(0, 16);
+            _encryptionKey = iv + "-" + _secret;
+
+            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string hash = VaultixCrypto.FileHash(exePath);
+
+            var payload = new PayloadBuilder("init")
+                .WithValue("ver", _version)
+                .WithValue("enckey", iv)
+                .WithValue("hash", hash)
+                .WithValue("name", _appName)
+                .WithValue("ownerid", _ownerId)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "init", out _);
+            if (resp == "Authvaultix_Invalid") Diagnostics.Crash("App not found");
+
+            var dto = JsonConvert.DeserializeObject<DtoInit>(resp);
+            if (dto == null) Diagnostics.Crash("Invalid JSON");
+            if (!dto.Success) Diagnostics.Crash(dto.Msg);
+
+            SessionId = dto.SessId;
+            Initialized = true;
+            Console.WriteLine("Session Initialized: " + SessionId);
+            return true;
+        }
+
+        public bool AuthenticateUser(string username, string password)
+        {
+            RisponceCollection = null;
+            EnsureReady();
+
+            var payload = new PayloadBuilder("login")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("username", username)
+                .WithValue("pass", password)
+                .WithValue("hwid", HardwareIdentifier.Fetch())
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
+            var dto = JsonConvert.DeserializeObject<DtoAuth>(resp);
+
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg ?? "Login failed";
+                return false;
+            }
+
+            CurrentUser = dto.Profile;
+            if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
+            return true;
+        }
+
+        public bool ValidateSession()
+        {
+            RisponceCollection = null;
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId)) Diagnostics.Crash("Session missing");
+
+            var payload = new PayloadBuilder("check")
+                .WithContext(_appName, _ownerId, SessionId)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "check", out _);
+            if (resp == null) Diagnostics.Crash("Connection failed");
+            if (string.IsNullOrWhiteSpace(resp) || resp[0] != '{') Diagnostics.Crash("Invalid response format");
+
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null) Diagnostics.Crash("Invalid JSON");
+            if (!dto.Success) Diagnostics.Crash(dto.Msg ?? "Session check failed");
+
+            RisponceCollection = dto.Msg;
+            LastMessage = RisponceCollection;
+            LastMessage1 = RisponceCollection;
+            return true;
+        }
+
+        public bool RegisterAccount(string username, string password, string licenseKey, string email)
+        {
+            RisponceCollection = null;
+            EnsureReady();
+
+            var payload = new PayloadBuilder("register")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("username", username)
+                .WithValue("pass", password)
+                .WithValue("key", licenseKey)
+                .WithValue("email", email)
+                .WithValue("hwid", HardwareIdentifier.Fetch())
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "register", out _);
+            var dto = JsonConvert.DeserializeObject<DtoAuth>(resp);
+
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg;
+                return false;
+            }
+
+            CurrentUser = dto.Profile;
+            if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
+            return true;
+        }
+
+        public bool LicenseAccess(string licenseKey)
+        {
+            EnsureReady();
+            var payload = new PayloadBuilder("license")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("key", licenseKey)
+                .WithValue("hwid", HardwareIdentifier.Fetch())
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "license", out _);
+            var dto = JsonConvert.DeserializeObject<DtoAuth>(resp);
+
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg;
+                return false;
+            }
+
+            CurrentUser = dto.Profile;
+            if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
+            return true;
+        }
+
+        public bool SendLog(string message, out string serverMessage)
+        {
+            serverMessage = null;
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                serverMessage = "Session missing. Please login again.";
+                return false;
+            }
+
+            var payload = new PayloadBuilder("log")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("message", message)
+                .WithValue("pcuser", Environment.UserName)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "log", out _);
+            if (string.IsNullOrWhiteSpace(resp))
+            {
+                serverMessage = "Log request failed (no response).";
+                return false;
+            }
+            if (resp[0] != '{')
+            {
+                serverMessage = resp.Trim();
+                return false;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null)
+            {
+                serverMessage = "Invalid server response";
+                return false;
+            }
+            if (!dto.Success)
+            {
+                serverMessage = dto.Msg ?? "Log failed";
+                return false;
+            }
+            LastMessage = dto.Msg;
+            serverMessage = dto.Msg;
+            return true;
+        }
+
+        public bool RetrieveFile(string fileId, out byte[] fileBytes, out string serverMessage)
+        {
+            fileBytes = null;
+            serverMessage = null;
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                serverMessage = "Session missing. Please login again.";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(fileId))
+            {
+                serverMessage = "Invalid file id.";
+                return false;
+            }
+
+            var payload = new PayloadBuilder("file")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("fileid", fileId)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "file", out _);
+            if (string.IsNullOrWhiteSpace(resp))
+            {
+                serverMessage = "Download request failed (no response).";
+                return false;
+            }
+            if (resp[0] != '{')
+            {
+                serverMessage = resp.Trim();
+                return false;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoData>(resp);
+            if (dto == null)
+            {
+                serverMessage = "Invalid server response";
+                return false;
+            }
+
+            LastMessage = dto.Msg;
+            LastMessage1 = dto.Msg;
+
+            if (!dto.Success)
+            {
+                serverMessage = dto.Msg ?? "Download failed";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(dto.B64Data))
+            {
+                serverMessage = "File content missing";
+                return false;
+            }
+            try
+            {
+                fileBytes = Convert.FromBase64String(dto.B64Data);
+                serverMessage = dto.Msg ?? "Download successful";
+                return true;
+            }
+            catch (FormatException)
+            {
+                serverMessage = "Invalid file encoding (base64)";
+                return false;
+            }
+        }
+
+        public bool GetOnlineClients(out List<OnlineUser> users, out string serverMessage)
+        {
+            users = null;
+            serverMessage = null;
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                serverMessage = "Session missing. Please login again.";
+                return false;
+            }
+
+            var payload = new PayloadBuilder("fetchonline")
+                .WithContext(_appName, _ownerId, SessionId)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "fetchonline", out _);
+            if (string.IsNullOrWhiteSpace(resp))
+            {
+                serverMessage = "Request failed. Please try again.";
+                return false;
+            }
+            if (resp[0] != '{')
+            {
+                serverMessage = resp.Trim();
+                return false;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoOnline>(resp);
+            if (dto == null)
+            {
+                serverMessage = "Invalid server response.";
+                return false;
+            }
+            if (!dto.Success)
+            {
+                serverMessage = dto.Msg ?? "Failed to fetch online users.";
+                return false;
+            }
+
+            users = dto.UserList ?? new List<OnlineUser>();
+            serverMessage = dto.Msg ?? "OK";
+            return true;
+        }
+
+        public bool EnforceBan(string reason, out string serverMessage)
+        {
+            serverMessage = null;
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                serverMessage = "Session missing. Please login again.";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(reason)) reason = "No reason provided";
+
+            var payload = new PayloadBuilder("ban")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("reason", reason)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "ban", out _);
+            if (string.IsNullOrWhiteSpace(resp))
+            {
+                serverMessage = "Request failed. Please try again.";
+                return false;
+            }
+            if (resp[0] != '{')
+            {
+                serverMessage = resp.Trim();
+                return false;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null)
+            {
+                serverMessage = "Invalid server response";
+                return false;
+            }
+
+            LastMessage = dto.Msg;
+            LastMessage1 = dto.Msg;
+
+            if (!dto.Success)
+            {
+                serverMessage = dto.Msg ?? "Ban failed";
+                return false;
+            }
+
+            serverMessage = dto.Msg ?? "Banned";
+            return true;
+        }
+
+        public void TerminateSession()
+        {
+            EnsureReady();
+            var payload = new PayloadBuilder("logout")
+                .WithContext(_appName, _ownerId, SessionId)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "logout", out _);
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null || !dto.Success) throw new Exception(dto?.Msg ?? "Logout Error");
+
+            SessionId = null;
+            Initialized = false;
+            Console.WriteLine("Logged out successfully");
+        }
+
+        public void UpdateUsername(string newUsername)
+        {
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(newUsername)) throw new Exception("New username cannot be empty");
+
+            var payload = new PayloadBuilder("changeusername")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("newUsername", newUsername)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "changeusername", out _);
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null || !dto.Success) throw new Exception(dto?.Msg ?? "Change username Error");
+
+            SessionId = null;
+            Initialized = false;
+            Console.WriteLine("Username changed successfully, user logged out.");
+        }
+
+        public bool VerifyBlacklist(out string serverMessage)
+        {
+            serverMessage = null;
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                serverMessage = "Session missing. Please login again.";
+                return false;
+            }
+
+            var payload = new PayloadBuilder("checkblacklist")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("hwid", HardwareIdentifier.Fetch())
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "checkblacklist", out _);
+            if (string.IsNullOrWhiteSpace(resp))
+            {
+                serverMessage = "Request failed. Please try again.";
+                return false;
+            }
+            if (resp[0] != '{')
+            {
+                serverMessage = resp.Trim();
+                return false;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null)
+            {
+                serverMessage = "Invalid server response";
+                return false;
+            }
+
+            LastMessage = dto.Msg;
+            LastMessage1 = dto.Msg;
+
+            if (!dto.Success)
+            {
+                serverMessage = dto.Msg ?? "Client is blacklisted";
+                return false;
+            }
+
+            serverMessage = dto.Msg ?? "Client is not blacklisted";
+            return true;
+        }
+
+        public bool TriggerPasswordReset(string username, string email)
+        {
+            EnsureReady();
+            var payload = new PayloadBuilder("forgot")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("username", username)
+                .WithValue("email", email)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "forgot", out _);
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg ?? "Failed";
+                return false;
+            }
+
+            Console.WriteLine("Reset email sent successfully");
+            return true;
+        }
+
+        public bool ApplyUpgrade(string username, string licenseKey)
+        {
+            EnsureReady();
+            var payload = new PayloadBuilder("upgrade")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("username", username)
+                .WithValue("key", licenseKey)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "upgrade", out _);
+            var dto = JsonConvert.DeserializeObject<DtoUpgrade>(resp);
+
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg ?? "Upgrade Error";
+                return false;
+            }
+
+            Console.WriteLine("Upgrade successful: " + (dto.Upgraded != null && dto.Upgraded.Count > 0 ? dto.Upgraded[0].name : "Unknown"));
+            return true;
+        }
+
+        public string FetchGlobalVariable(string varKey)
+        {
+            RisponceCollection = "";
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                RisponceCollection = "Session missing. Please login again.";
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(varKey))
+            {
+                RisponceCollection = "Invalid variable key.";
+                return null;
+            }
+
+            var payload = new PayloadBuilder("var")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("varid", varKey)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "var", out _);
+            if (string.IsNullOrWhiteSpace(resp) || resp[0] != '{')
+            {
+                RisponceCollection = "Invalid server response.";
+                return null;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg ?? "Failed to fetch variable.";
+                return null;
+            }
+
+            RisponceCollection = "OK";
+            return dto.Msg;
+        }
+
+        public string FetchUserVariable(string varName)
+        {
+            RisponceCollection = "";
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                RisponceCollection = "Session missing. Please login again.";
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(varName))
+            {
+                RisponceCollection = "Invalid variable name.";
+                return null;
+            }
+
+            var payload = new PayloadBuilder("getvar")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("var", varName)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "getvar", out _);
+            if (string.IsNullOrWhiteSpace(resp) || resp[0] != '{')
+            {
+                RisponceCollection = resp?.Trim() ?? "Request failed.";
+                return null;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoVar>(resp);
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg ?? "Failed to get variable.";
+                return null;
+            }
+
+            RisponceCollection = dto.Msg ?? "OK";
+            return dto.VarData;
+        }
+
+        public bool UpdateUserVariable(string varName, string value)
+        {
+            RisponceCollection = "";
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                RisponceCollection = "Session missing. Please login again.";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(varName))
+            {
+                RisponceCollection = "Invalid variable name.";
+                return false;
+            }
+
+            var payload = new PayloadBuilder("setvar")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("var", varName)
+                .WithValue("data", value ?? string.Empty)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "setvar", out _);
+            if (string.IsNullOrWhiteSpace(resp) || resp[0] != '{')
+            {
+                RisponceCollection = resp?.Trim() ?? "Request failed.";
+                return false;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+            if (dto == null)
+            {
+                RisponceCollection = "Invalid server response.";
+                return false;
+            }
+
+            RisponceCollection = dto.Msg ?? (dto.Success ? "OK" : "Failed");
+            LastMessage = RisponceCollection;
+            LastMessage1 = RisponceCollection;
+
+            return dto.Success;
+        }
+
+        public bool TransmitChatMessage(string message, string channel, out string serverMessage)
+        {
+            serverMessage = null;
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                serverMessage = "Session missing. Please login again.";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                serverMessage = "Message cannot be empty.";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(channel))
+            {
+                serverMessage = "Invalid channel.";
+                return false;
+            }
+
+            var payload = new PayloadBuilder("chatsend")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("message", message)
+                .WithValue("channel", channel)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "chatsend", out _);
+            if (string.IsNullOrWhiteSpace(resp))
+            {
+                serverMessage = "Request failed. Please try again.";
+                return false;
+            }
+            if (resp[0] != '{')
+            {
+                serverMessage = resp.Trim();
+                LastResponseMessage = serverMessage;
+                return false;
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoChat>(resp);
+            if (dto == null)
+            {
+                serverMessage = "Invalid server response.";
+                return false;
+            }
+
+            LastResponseMessage = dto.Msg;
+
+            if (!dto.Success)
+            {
+                if (dto.ErrCode == 403 && dto.RemainingSec > 0)
+                {
+                    serverMessage = $"Muted till {dto.MutedTime} (wait {dto.MutedHuman})";
+                    LastResponseMessage = serverMessage;
+                    return false;
+                }
+                serverMessage = dto.Msg ?? "Failed to send message.";
+                return false;
+            }
+
+            serverMessage = dto.Msg ?? "Message sent.";
+            return true;
+        }
+
+        public Task<List<ChatMessage>> RetrieveChatHistory(string channel)
+        {
+            EnsureReady();
+            LastResponseMessage = null;
+            if (string.IsNullOrWhiteSpace(SessionId))
+            {
+                LastResponseMessage = "Session missing. Please login again.";
+                return Task.FromResult(new List<ChatMessage>());
+            }
+            if (string.IsNullOrWhiteSpace(channel))
+            {
+                LastResponseMessage = "Invalid channel.";
+                return Task.FromResult(new List<ChatMessage>());
+            }
+
+            var payload = new PayloadBuilder("chatfetch")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("channel", channel)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "chatfetch", out _);
+            if (string.IsNullOrWhiteSpace(resp))
+            {
+                LastResponseMessage = "Request failed. Please try again.";
+                return Task.FromResult(new List<ChatMessage>());
+            }
+            if (resp[0] != '{')
+            {
+                LastResponseMessage = resp.Trim();
+                return Task.FromResult(new List<ChatMessage>());
+            }
+
+            var dto = JsonConvert.DeserializeObject<DtoChatHistory>(resp);
+            if (dto == null)
+            {
+                LastResponseMessage = "Invalid server response.";
+                return Task.FromResult(new List<ChatMessage>());
+            }
+
+            if (!dto.Success)
+            {
+                LastResponseMessage = dto.Msg ?? "Failed to fetch chat messages.";
+                return Task.FromResult(new List<ChatMessage>());
+            }
+
+            LastResponseMessage = dto.Msg ?? "OK";
+            return Task.FromResult(dto.Log ?? new List<ChatMessage>());
         }
     }
 
-    private static string SplitEvery(string text, int size, string separator)
+    internal class PayloadBuilder
     {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < text.Length; i += size)
-        {
-            if (i > 0)
-                sb.Append(separator);
+        private readonly NameValueCollection _nvc;
 
-            sb.Append(text.Substring(i, Math.Min(size, text.Length - i)));
+        public PayloadBuilder(string actionType)
+        {
+            _nvc = new NameValueCollection { ["type"] = actionType };
         }
-        return sb.ToString();
+
+        public PayloadBuilder WithContext(string appName, string ownerId, string sessionId)
+        {
+            _nvc["name"] = appName;
+            _nvc["ownerid"] = ownerId;
+            if (!string.IsNullOrEmpty(sessionId))
+                _nvc["sessionid"] = sessionId;
+            return this;
+        }
+
+        public PayloadBuilder WithValue(string key, string value)
+        {
+            if (value != null)
+                _nvc[key] = value;
+            return this;
+        }
+
+        public NameValueCollection Compile() => _nvc;
+    }
+
+    internal class NetworkAgent
+    {
+        public static string Post(string url, NameValueCollection payload, string encKey, string actionType, out string signature)
+        {
+            signature = string.Empty;
+            try
+            {
+                using (var client = new WebClient { Proxy = null })
+                {
+                    client.Headers.Add("User-Agent", "AuthVaultixClient/1.0");
+                    ServicePointManager.ServerCertificateValidationCallback += SecureSslValidation;
+
+                    byte[] responseBytes = client.UploadValues(url, payload);
+                    string rawResponse = Encoding.UTF8.GetString(responseBytes);
+                    signature = client.ResponseHeaders["signature"];
+
+                    ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+                    if (!VaultixCrypto.Verify(rawResponse, signature, actionType, encKey))
+                    {
+                        Diagnostics.Crash("Signature verification failed. Request tampered");
+                        return null;
+                    }
+                    return rawResponse;
+                }
+            }
+            catch (WebException wex)
+            {
+                if (wex.Response is HttpWebResponse resp && resp.StatusCode == (HttpStatusCode)429)
+                    Diagnostics.Crash("You're connecting too fast, slow down.");
+                else
+                    Diagnostics.Crash("Connection failure or network error.");
+                return null;
+            }
+        }
+
+        private static bool SecureSslValidation(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors errors)
+        {
+            if ((!cert.Issuer.Contains("Cloudflare") && !cert.Issuer.Contains("Google") && !cert.Issuer.Contains("Let's Encrypt")) || errors != SslPolicyErrors.None)
+            {
+                Diagnostics.Crash("SSL assertion failed. Possible MITM or proxy.");
+                return false;
+            }
+            return true;
+        }
+    }
+
+    internal static class VaultixCrypto
+    {
+        public static bool Verify(string payload, string serverSig, string type, string key)
+        {
+            if (type == "log" || type == "file") return true;
+            if (string.IsNullOrEmpty(serverSig)) return false;
+
+            string signingKey = (type == "init") ? key.Substring(17, 64) : key;
+            string localSig = GenerateHmac(signingKey, payload);
+            return CryptographicEquals(localSig, serverSig);
+        }
+
+        private static string GenerateHmac(string key, string data)
+        {
+            using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
+            {
+                byte[] hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+                return BitConverter.ToString(hash).Replace("-", "").ToLower();
+            }
+        }
+
+        private static bool CryptographicEquals(string a, string b)
+        {
+            if (a.Length != b.Length) return false;
+            int r = 0;
+            for (int i = 0; i < a.Length; i++) r |= a[i] ^ b[i];
+            return r == 0;
+        }
+
+        public static string FileHash(string path)
+        {
+            using (var sha = SHA256.Create())
+            using (var fs = File.OpenRead(path))
+            {
+                return BitConverter.ToString(sha.ComputeHash(fs)).Replace("-", "").ToLower();
+            }
+        }
+    }
+
+    internal static class HardwareIdentifier
+    {
+        public static string Fetch()
+        {
+            string raw = string.Join("|", Environment.MachineName, Environment.UserName, Environment.UserDomainName, Environment.OSVersion.VersionString, Environment.Is64BitOperatingSystem ? "x64" : "x86", Environment.Version.ToString(), CultureInfo.CurrentCulture.Name, WindowsIdentity.GetCurrent().User.Value);
+            using (var sha = SHA256.Create())
+            {
+                byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(raw));
+                var sb = new StringBuilder();
+                foreach (byte b in bytes) sb.Append(b.ToString("X2"));
+                string hex = sb.ToString();
+
+                var formatted = new StringBuilder();
+                for (int i = 0; i < hex.Length; i += 4)
+                {
+                    if (i > 0) formatted.Append("-");
+                    formatted.Append(hex.Substring(i, Math.Min(4, hex.Length - i)));
+                }
+                return formatted.ToString();
+            }
+        }
+    }
+
+    internal static class Diagnostics
+    {
+        [DllImport("kernel32.dll")]
+        private static extern bool AllocConsole();
+
+        public static void Crash(string exceptionDetail)
+        {
+            try { File.AppendAllText("auth_diagnostics.txt", $"[{DateTime.Now}] FATAL: {exceptionDetail}\n"); } catch { }
+
+            AllocConsole();
+            var stdOut = Console.OpenStandardOutput();
+            using (var writer = new StreamWriter(stdOut) { AutoFlush = true })
+            {
+                Console.SetOut(writer);
+                Console.SetError(writer);
+                Console.Title = "System Halt";
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("=======================================");
+                Console.WriteLine("SUBSYSTEM FAILURE");
+                Console.WriteLine(exceptionDetail);
+                Console.WriteLine("=======================================");
+                Console.ResetColor();
+                Thread.Sleep(3000);
+            }
+            Environment.Exit(1);
+        }
+    }
+
+    internal class DtoBasic
+    {
+        [JsonProperty("success")] public bool Success { get; set; }
+        [JsonProperty("message")] public string Msg { get; set; }
+    }
+
+    internal class DtoInit : DtoBasic
+    {
+        [JsonProperty("sessionid")] public string SessId { get; set; }
+        [JsonProperty("appinfo")] public AppInfo AppInfo { get; set; }
+    }
+
+    internal class DtoAuth : DtoBasic
+    {
+        [JsonProperty("info")] public UserInfo Profile { get; set; }
+        [JsonProperty("sessionid")] public string SessId { get; set; }
+    }
+
+    internal class DtoData : DtoBasic
+    {
+        [JsonProperty("contents")] public string B64Data { get; set; }
+    }
+
+    internal class DtoVar : DtoBasic
+    {
+        [JsonProperty("response")] public string VarData { get; set; }
+    }
+
+    internal class DtoOnline : DtoBasic
+    {
+        [JsonProperty("users")] public List<OnlineUser> UserList { get; set; }
+    }
+
+    internal class DtoChat : DtoBasic
+    {
+        [JsonProperty("code")] public int ErrCode { get; set; }
+        [JsonProperty("remaining_seconds")] public int RemainingSec { get; set; }
+        [JsonProperty("muted_until")] public string MutedTime { get; set; }
+        [JsonProperty("remaining_human")] public string MutedHuman { get; set; }
+    }
+
+    internal class DtoChatHistory : DtoBasic
+    {
+        [JsonProperty("messages")] public List<ChatMessage> Log { get; set; }
+    }
+
+    internal class DtoUpgrade : DtoBasic
+    {
+        [JsonProperty("users")] public List<UpgradeUser> Upgraded { get; set; }
     }
 }
