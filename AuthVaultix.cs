@@ -175,10 +175,7 @@ namespace AuthVaultix
 
             string iv = Guid.NewGuid().ToString("N").Substring(0, 16);
             _encryptionKey = iv + "-" + _secret;
-
-            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string hash = VaultixCrypto.FileHash(exePath);
-
+            string hash = VaultixCrypto.FileHash(Process.GetCurrentProcess().MainModule.FileName);
             var payload = new PayloadBuilder("init")
                 .WithValue("ver", _version)
                 .WithValue("enckey", iv)
