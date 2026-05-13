@@ -83,6 +83,18 @@ if (!Client.CheckBlacklist(out msg))
 
 ---
 
+## Make Form Draggable
+
+If you want to allow users to move your borderless form around, you can use the `Drag.cs` class.
+
+```cs
+Drag.MakeDraggable(this);
+```
+
+Call this in your form's constructor after `InitializeComponent()`.
+
+---
+
 ## Login with Username / Password
 
 ```cs
@@ -114,6 +126,7 @@ this.Hide();
 ```
 
 ---
+
 ## Upgrade User (Username + New License Key)
 
 Used so the user can add extra time or upgrade their subscription by claiming a new key.
@@ -156,7 +169,7 @@ this.Hide();
 Allow users to reset their password via email.
 
 ```cs
-if (!Client.ForgotPassword(userFild.Text, keyFild.Text))
+if (!Client.ForgotPassword(userFild.Text, emailFild.Text))
 {
     MessageBox.Show(Client.RisponceCollection, "Forgot Password Failed");
     return;
@@ -353,6 +366,12 @@ var messages = await Client.ChatFetch("channel_name");
 
 chatroomGrid.Rows.Clear();
 
+if (!string.IsNullOrEmpty(Client.LastResponseMessage) && Client.LastResponseMessage != "OK")
+{
+    MessageBox.Show(Client.LastResponseMessage, "Chat Error");
+    return;
+}
+
 if (messages == null || messages.Count == 0)
 {
     chatroomGrid.Rows.Insert(0, "AuthVaultix", "No chat messages", DateTime.Now);
@@ -375,7 +394,7 @@ foreach (var msg in messages)
 string responseMsg;
 if (Client.ChatSend(chatMsgField.Text, "channel_name", out responseMsg))
 {
-    chatroomGrid.Rows.Insert(0, Client.CurrentUser.username, chatMsgField.Text, DateTime.Now);
+    chatroomGrid.Rows.Insert(0, Client.CurrentUser.username, chatMsgField.Text, DateTime.Now.ToString());
     chatMsgField.Clear();
 }
 else
@@ -424,4 +443,3 @@ AuthVaultix is proprietary software. Unauthorized redistribution, reselling, or 
 - You may **not** alter, bypass, or circumvent the license key functionality.
 
 Thank you for your compliance — we work hard on the development of AuthVaultix and do not appreciate our copyright being infringed.
-
