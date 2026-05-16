@@ -18,6 +18,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
 namespace AuthVaultix
 {
     public class AuthVaultixClient
@@ -58,6 +63,7 @@ namespace AuthVaultix
         public bool SetVar(string varName, string value) => _core.UpdateUserVariable(varName, value);
         public bool ChatSend(string message, string channel, out string serverMessage) => _core.TransmitChatMessage(message, channel, out serverMessage);
         public Task<List<ChatMessage>> ChatFetch(string channel) => _core.RetrieveChatHistory(channel);
+        public bool Tamper(string reason) => _core.ReportTampering(reason);
     }
 
     public class OnlineUser
@@ -856,6 +862,30 @@ namespace AuthVaultix
             LastResponseMessage = dto.Msg ?? "OK";
             return Task.FromResult(dto.Log ?? new List<ChatMessage>());
         }
+
+        public bool ReportTampering(string reason)
+        {
+            EnsureReady();
+            if (string.IsNullOrWhiteSpace(SessionId)) return false;
+            if (string.IsNullOrWhiteSpace(reason)) reason = "Tampering Detected";
+
+            var payload = new PayloadBuilder("tamper")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("reason", reason)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "tamper", out _);
+            var dto = JsonConvert.DeserializeObject<DtoBasic>(resp);
+
+            if (dto == null || !dto.Success)
+            {
+                RisponceCollection = dto?.Msg ?? "Tamper report failed";
+                return false;
+            }
+
+            return true;
+        }
     }
 
     internal class PayloadBuilder
@@ -1021,6 +1051,48 @@ namespace AuthVaultix
             }
             Environment.Exit(1);
         }
+    }
+
+    public static class AntiTamper
+    {
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        private static extern bool CheckRemoteDebuggerPresent(IntPtr hProcess, ref bool isDebuggerPresent);
+
+        private static readonly string[] BadProcesses = { 
+            "dnspy", "x64dbg", "x32dbg", "ollydbg", "cheatengine", "wireshark", 
+            "httpdebugger", "fiddler", "processhacker", "scylla", "megadumper" 
+        };
+
+        public static void Check()
+        {
+            if (Debugger.IsAttached)
+                Trigger("Debugger Attached");
+
+            bool isDebuggerPresent = false;
+            CheckRemoteDebuggerPresent(Process.GetCurrentProcess().Handle, ref isDebuggerPresent);
+            if (isDebuggerPresent)
+                Trigger("Remote Debugger Detected");
+
+            foreach (var process in Process.GetProcesses())
+            {
+                if (BadProcesses.Any(p => process.ProcessName.ToLower().Contains(p)))
+                    Trigger($"Suspicious Process: {process.ProcessName}");
+            }
+        }
+
+        private static void Trigger(string reason)
+        {
+            // If we are logged in, try to report it.
+            // Note: LoginForm.Client or equivalent needs to be accessible.
+            // We'll let the MainForm handle the reporting if possible, 
+            // or we can pass the client instance here.
+            
+            // For now, let's throw an exception that MainForm can catch 
+            // or just define a static event.
+            OnTamperDetected?.Invoke(reason);
+        }
+
+        public static event Action<string> OnTamperDetected;
     }
 
     internal class DtoBasic
