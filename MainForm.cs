@@ -17,33 +17,20 @@ namespace Client
         public MainForm()
         {
             InitializeComponent();
-            Drag.MakeDraggable(this); 
+            Drag.MakeDraggable(this);
             timer1.Interval = 5000; // 5 sec (testing)
             timer1.Start();
-        }
 
-        public static DateTime UnixToDate(string unix)
-        {
-            if (long.TryParse(unix, out long unixTime))
+            // Subscribe to tamper detection
+            AntiTamper.OnTamperDetected += (reason) =>
             {
-                return DateTimeOffset.FromUnixTimeSeconds(unixTime).DateTime;
-            }
-            else
-            {
-                return DateTime.MinValue;
-            }
+                // Trigger the API report
+                LoginForm.Client.Tamper(reason);
+                MessageBox.Show($"Tamper Detected: {reason}\nYou have been banned.", "Security Violation", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            };
         }
-        public string GetTimeLeft()
-        {
-            var sub = LoginForm.Client.CurrentUser.subscriptions[0];
-            long expiry = long.Parse(sub.expiry);
 
-            DateTime expDate = DateTimeOffset.FromUnixTimeSeconds(expiry).DateTime;
-
-            TimeSpan diff = expDate - DateTime.Now;
-
-            return $"{diff.Days} Days {diff.Hours} Hours";
-        }
         private void MainForm_Load(object sender, EventArgs e)
         {
             // Fetches the user's "level" variable from the server. This is used to determine user access rights (e.g., VIP status). The server stores this variable per account.Based on its value, we can enable or restrict certain features.
@@ -109,16 +96,16 @@ namespace Client
             {
                 MessageBox.Show(msg, "Banned");
                 MessageBox.Show("Please reopen this program");
-                Environment.Exit(0); 
+                Environment.Exit(0);
                 return;
             }
-            else{MessageBox.Show(msg, "Ban Failed");}
+            else { MessageBox.Show(msg, "Ban Failed"); }
         }
 
         private void checkSessionBtn_Click(object sender, EventArgs e)
         {
             if (LoginForm.Client.Check())
-            {MessageBox.Show(LoginForm.Client.RisponceCollection);return;}
+            { MessageBox.Show(LoginForm.Client.RisponceCollection); return; }
         }
 
         private void CheackBlacklistBtn_Click(object sender, EventArgs e)
@@ -161,7 +148,7 @@ namespace Client
                 MessageBox.Show(msg, "Download Failed");
                 return;
             }
-            if (bytes == null || bytes.Length == 0){MessageBox.Show("File data empty", "Error");return;}
+            if (bytes == null || bytes.Length == 0) { MessageBox.Show("File data empty", "Error"); return; }
 
             try
             {
@@ -169,7 +156,7 @@ namespace Client
                 File.WriteAllBytes(fullPath, bytes);
                 MessageBox.Show("Downloaded " + bytes.Length + " bytes", "Success");
             }
-            catch (Exception ex){MessageBox.Show("File save error: " + ex.Message, "Error");}
+            catch (Exception ex) { MessageBox.Show("File save error: " + ex.Message, "Error"); }
         }
 
         private void fetchUserVarBtn_Click(object sender, EventArgs e)
@@ -207,7 +194,7 @@ namespace Client
             try
             {
                 string msg;
-                bool ok =  LoginForm.Client.ChatSend(chatMsgField.Text, chatchannel, out msg);
+                bool ok = LoginForm.Client.ChatSend(chatMsgField.Text, chatchannel, out msg);
 
                 if (ok)
                 {
@@ -229,6 +216,9 @@ namespace Client
         {
             timer1.Interval = 15000; // 15 seconds
 
+            
+            AntiTamper.Check(); // Run anti-tamper check
+
             if (string.IsNullOrWhiteSpace(chatchannel))
             {
                 timer1.Stop();
@@ -242,7 +232,6 @@ namespace Client
 
                 chatroomGrid.Rows.Clear();
 
-                // ✅ error show karo
                 if (!string.IsNullOrEmpty(LoginForm.Client.LastResponseMessage) &&
                     LoginForm.Client.LastResponseMessage != "OK")
                 {
@@ -264,9 +253,9 @@ namespace Client
             }
             catch (Exception ex)
             {
-                // if signature / session / network fail 
-                timer1.Stop();
-                MessageBox.Show("Chat error: " + ex.Message);
+               
+                timer1.Stop();  // if signature / session / network fail 
+                Console.WriteLine("Chat error: " + ex.Message);
             }
         }
     }
