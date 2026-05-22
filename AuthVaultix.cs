@@ -64,6 +64,7 @@ namespace AuthVaultix
         public bool ChatSend(string message, string channel, out string serverMessage) => _core.TransmitChatMessage(message, channel, out serverMessage);
         public Task<List<ChatMessage>> ChatFetch(string channel) => _core.RetrieveChatHistory(channel);
         public bool Tamper(string reason) => _core.ReportTampering(reason);
+        public bool CheckFeaturePermission(string feature) => _core.CheckFeaturePermission(feature);
     }
 
     public class OnlineUser
@@ -151,6 +152,7 @@ namespace AuthVaultix
         public bool UseFullKey { get; internal set; }
         public string SessionId { get; internal set; }
         public bool Initialized { get; internal set; }
+        public List<string> UserPermissions { get; internal set; } = new List<string>();
 
         private string _encryptionKey;
 
@@ -225,6 +227,7 @@ namespace AuthVaultix
             }
 
             CurrentUser = dto.Profile;
+            UserPermissions = dto.Permissions ?? new List<string>();
             if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
             return true;
         }
@@ -277,6 +280,7 @@ namespace AuthVaultix
             }
 
             CurrentUser = dto.Profile;
+            UserPermissions = dto.Permissions ?? new List<string>();
             if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
             return true;
         }
@@ -300,6 +304,7 @@ namespace AuthVaultix
             }
 
             CurrentUser = dto.Profile;
+            UserPermissions = dto.Permissions ?? new List<string>();
             if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
             return true;
         }
@@ -519,6 +524,7 @@ namespace AuthVaultix
 
             SessionId = null;
             Initialized = false;
+            UserPermissions.Clear();
             Console.WriteLine("Logged out successfully");
         }
 
@@ -886,6 +892,12 @@ namespace AuthVaultix
 
             return true;
         }
+
+        public bool CheckFeaturePermission(string feature)
+        {
+            if (string.IsNullOrEmpty(feature) || UserPermissions == null) return false;
+            return UserPermissions.Contains(feature);
+        }
     }
 
     internal class PayloadBuilder
@@ -1111,6 +1123,7 @@ namespace AuthVaultix
     {
         [JsonProperty("info")] public UserInfo Profile { get; set; }
         [JsonProperty("sessionid")] public string SessId { get; set; }
+        [JsonProperty("permissions")] public List<string> Permissions { get; set; }
     }
 
     internal class DtoData : DtoBasic
