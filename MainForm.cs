@@ -54,6 +54,20 @@ namespace Client
             userDataField.Items.Add($"Creation Date: {LoginForm.Client.CurrentUser.CreationDateFormatted}");
             userDataField.Items.Add($"Last Login: {LoginForm.Client.CurrentUser.LastLoginFormatted}");
             userDataField.Items.Add($"Time Left: {LoginForm.Client.CurrentUser.subscriptions[0].TimeLeft}");
+            
+            // Add feature permission checks
+            bool hasVip = LoginForm.Client.CheckFeaturePermission("VIP");
+            bool haspremium = LoginForm.Client.CheckFeaturePermission("premium");
+            bool hasEsp = LoginForm.Client.CheckFeaturePermission("ESP");
+
+            userDataField.Items.Add($"VIP Feature: {(hasVip ? "Access Granted" : "Access Denied")}");
+            userDataField.Items.Add($"premium Feature: {(haspremium ? "Access Granted" : "Access Denied")}");
+            userDataField.Items.Add($"ESP Feature: {(hasEsp ? "Access Granted" : "Access Denied")}");
+
+            Console.WriteLine($"[+] VIP Feature: {(hasVip ? "Access Granted! VIP menu loaded." : "Access Denied! Please buy VIP package.")}");
+            Console.WriteLine($"[+] premium Feature: {(haspremium ? "Activated successfully!" : "Locked! Upgrade required.")}");
+            Console.WriteLine($"[+] ESP Feature: {(hasEsp ? "Activated successfully!" : "Locked! Upgrade required.")}");
+
             try
             {
                 List<OnlineUser> onlineUsers;
@@ -235,7 +249,7 @@ namespace Client
                 if (!string.IsNullOrEmpty(LoginForm.Client.LastResponseMessage) &&
                     LoginForm.Client.LastResponseMessage != "OK")
                 {
-                    MessageBox.Show(LoginForm.Client.LastResponseMessage, "Chat Error");
+                    Console.WriteLine(LoginForm.Client.LastResponseMessage, "Chat Error");
                     timer1.Stop();
                     return;
                 }
@@ -257,6 +271,24 @@ namespace Client
                 timer1.Stop();  // if signature / session / network fail 
                 Console.WriteLine("Chat error: " + ex.Message);
             }
+        }
+
+        private void btnVIP_Click(object sender, EventArgs e)
+        {
+            if (!LoginForm.Client.CheckFeaturePermission("VIP"))
+            {
+                MessageBox.Show("VIP locked! Upgrade required.");
+                return;
+            }  
+            StartESP(); // Feature code 
+        }
+
+        void StartESP()
+        {
+            if (!LoginForm.Client.CheckFeaturePermission("VIP"))
+                return;
+
+            MessageBox.Show("VIP Activated!"); // actual ESP logic
         }
     }
 }
