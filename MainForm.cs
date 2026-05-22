@@ -280,14 +280,6 @@ namespace Client
                 MessageBox.Show("VIP locked! Upgrade required.");
                 return;
             }  
-            StartESP(); // Feature code 
-        }
-
-        void StartESP()
-        {
-            if (!LoginForm.Client.CheckFeaturePermission("VIP"))
-                return;
-
             MessageBox.Show("VIP Activated!"); // actual ESP logic
         }
     }
