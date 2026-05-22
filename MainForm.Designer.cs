@@ -1,4 +1,4 @@
-﻿namespace Client
+namespace Client
 {
     partial class MainForm
     {
@@ -60,6 +60,7 @@
             this.minBtn = new System.Windows.Forms.Button();
             this.closeBtn = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.btnVIP = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.chatroomGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -69,9 +70,9 @@
             this.userDataField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.userDataField.ForeColor = System.Drawing.Color.White;
             this.userDataField.FormattingEnabled = true;
-            this.userDataField.Location = new System.Drawing.Point(3, 534);
+            this.userDataField.Location = new System.Drawing.Point(7, 543);
             this.userDataField.Name = "userDataField";
-            this.userDataField.Size = new System.Drawing.Size(433, 106);
+            this.userDataField.Size = new System.Drawing.Size(433, 132);
             this.userDataField.TabIndex = 63;
             // 
             // onlineUsersField
@@ -83,9 +84,9 @@
             this.onlineUsersField.Items.AddRange(new object[] {
             "Online Users:",
             ""});
-            this.onlineUsersField.Location = new System.Drawing.Point(442, 534);
+            this.onlineUsersField.Location = new System.Drawing.Point(446, 543);
             this.onlineUsersField.Name = "onlineUsersField";
-            this.onlineUsersField.Size = new System.Drawing.Size(336, 106);
+            this.onlineUsersField.Size = new System.Drawing.Size(336, 132);
             this.onlineUsersField.TabIndex = 65;
             // 
             // banBtn
@@ -94,7 +95,7 @@
             this.banBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.banBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.banBtn.ForeColor = System.Drawing.Color.White;
-            this.banBtn.Location = new System.Drawing.Point(4, 424);
+            this.banBtn.Location = new System.Drawing.Point(4, 409);
             this.banBtn.Name = "banBtn";
             this.banBtn.Size = new System.Drawing.Size(323, 30);
             this.banBtn.TabIndex = 130;
@@ -107,7 +108,7 @@
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label10.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label10.Location = new System.Drawing.Point(-1, 187);
+            this.label10.Location = new System.Drawing.Point(-1, 185);
             this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(117, 15);
@@ -119,7 +120,7 @@
             this.fileExtensionField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
             this.fileExtensionField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fileExtensionField.ForeColor = System.Drawing.Color.White;
-            this.fileExtensionField.Location = new System.Drawing.Point(2, 205);
+            this.fileExtensionField.Location = new System.Drawing.Point(2, 203);
             this.fileExtensionField.Name = "fileExtensionField";
             this.fileExtensionField.Size = new System.Drawing.Size(323, 20);
             this.fileExtensionField.TabIndex = 124;
@@ -152,7 +153,7 @@
             this.downloadFileBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.downloadFileBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.downloadFileBtn.ForeColor = System.Drawing.Color.White;
-            this.downloadFileBtn.Location = new System.Drawing.Point(2, 231);
+            this.downloadFileBtn.Location = new System.Drawing.Point(2, 226);
             this.downloadFileBtn.Name = "downloadFileBtn";
             this.downloadFileBtn.Size = new System.Drawing.Size(323, 30);
             this.downloadFileBtn.TabIndex = 121;
@@ -165,7 +166,7 @@
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label6.Location = new System.Drawing.Point(-1, 264);
+            this.label6.Location = new System.Drawing.Point(-1, 258);
             this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(130, 15);
@@ -177,7 +178,7 @@
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label5.Location = new System.Drawing.Point(0, 344);
+            this.label5.Location = new System.Drawing.Point(0, 334);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(119, 15);
@@ -189,7 +190,7 @@
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label3.Location = new System.Drawing.Point(-1, 61);
+            this.label3.Location = new System.Drawing.Point(-1, 69);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(210, 15);
@@ -201,7 +202,7 @@
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label4.Location = new System.Drawing.Point(-1, 17);
+            this.label4.Location = new System.Drawing.Point(-1, 30);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(119, 15);
@@ -213,7 +214,7 @@
             this.varDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
             this.varDataField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.varDataField.ForeColor = System.Drawing.Color.White;
-            this.varDataField.Location = new System.Drawing.Point(2, 79);
+            this.varDataField.Location = new System.Drawing.Point(2, 86);
             this.varDataField.Name = "varDataField";
             this.varDataField.Size = new System.Drawing.Size(323, 20);
             this.varDataField.TabIndex = 111;
@@ -223,7 +224,7 @@
             this.varField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
             this.varField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.varField.ForeColor = System.Drawing.Color.White;
-            this.varField.Location = new System.Drawing.Point(2, 35);
+            this.varField.Location = new System.Drawing.Point(2, 47);
             this.varField.Name = "varField";
             this.varField.Size = new System.Drawing.Size(323, 20);
             this.varField.TabIndex = 110;
@@ -234,7 +235,7 @@
             this.fetchUserVarBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.fetchUserVarBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.fetchUserVarBtn.ForeColor = System.Drawing.Color.White;
-            this.fetchUserVarBtn.Location = new System.Drawing.Point(172, 105);
+            this.fetchUserVarBtn.Location = new System.Drawing.Point(172, 109);
             this.fetchUserVarBtn.Name = "fetchUserVarBtn";
             this.fetchUserVarBtn.Size = new System.Drawing.Size(155, 30);
             this.fetchUserVarBtn.TabIndex = 109;
@@ -248,7 +249,7 @@
             this.setUserVarBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.setUserVarBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.setUserVarBtn.ForeColor = System.Drawing.Color.White;
-            this.setUserVarBtn.Location = new System.Drawing.Point(2, 105);
+            this.setUserVarBtn.Location = new System.Drawing.Point(2, 109);
             this.setUserVarBtn.Name = "setUserVarBtn";
             this.setUserVarBtn.Size = new System.Drawing.Size(155, 30);
             this.setUserVarBtn.TabIndex = 108;
@@ -261,7 +262,7 @@
             this.globalVariableField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
             this.globalVariableField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.globalVariableField.ForeColor = System.Drawing.Color.White;
-            this.globalVariableField.Location = new System.Drawing.Point(2, 282);
+            this.globalVariableField.Location = new System.Drawing.Point(2, 276);
             this.globalVariableField.Name = "globalVariableField";
             this.globalVariableField.Size = new System.Drawing.Size(323, 20);
             this.globalVariableField.TabIndex = 107;
@@ -272,7 +273,7 @@
             this.fetchGlobalVariableBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.fetchGlobalVariableBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.fetchGlobalVariableBtn.ForeColor = System.Drawing.Color.White;
-            this.fetchGlobalVariableBtn.Location = new System.Drawing.Point(2, 308);
+            this.fetchGlobalVariableBtn.Location = new System.Drawing.Point(2, 300);
             this.fetchGlobalVariableBtn.Name = "fetchGlobalVariableBtn";
             this.fetchGlobalVariableBtn.Size = new System.Drawing.Size(323, 30);
             this.fetchGlobalVariableBtn.TabIndex = 106;
@@ -286,7 +287,7 @@
             this.checkSessionBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.checkSessionBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.checkSessionBtn.ForeColor = System.Drawing.Color.White;
-            this.checkSessionBtn.Location = new System.Drawing.Point(4, 460);
+            this.checkSessionBtn.Location = new System.Drawing.Point(4, 442);
             this.checkSessionBtn.Name = "checkSessionBtn";
             this.checkSessionBtn.Size = new System.Drawing.Size(323, 30);
             this.checkSessionBtn.TabIndex = 105;
@@ -300,7 +301,7 @@
             this.sendLogDataBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.sendLogDataBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.sendLogDataBtn.ForeColor = System.Drawing.Color.White;
-            this.sendLogDataBtn.Location = new System.Drawing.Point(3, 388);
+            this.sendLogDataBtn.Location = new System.Drawing.Point(3, 376);
             this.sendLogDataBtn.Name = "sendLogDataBtn";
             this.sendLogDataBtn.Size = new System.Drawing.Size(323, 30);
             this.sendLogDataBtn.TabIndex = 104;
@@ -313,7 +314,7 @@
             this.logDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
             this.logDataField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.logDataField.ForeColor = System.Drawing.Color.White;
-            this.logDataField.Location = new System.Drawing.Point(3, 362);
+            this.logDataField.Location = new System.Drawing.Point(3, 352);
             this.logDataField.Name = "logDataField";
             this.logDataField.Size = new System.Drawing.Size(323, 20);
             this.logDataField.TabIndex = 103;
@@ -324,7 +325,7 @@
             this.sendMsgBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.sendMsgBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.sendMsgBtn.ForeColor = System.Drawing.Color.White;
-            this.sendMsgBtn.Location = new System.Drawing.Point(688, 495);
+            this.sendMsgBtn.Location = new System.Drawing.Point(688, 508);
             this.sendMsgBtn.Name = "sendMsgBtn";
             this.sendMsgBtn.Size = new System.Drawing.Size(94, 36);
             this.sendMsgBtn.TabIndex = 133;
@@ -336,7 +337,7 @@
             // 
             this.chatMsgField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
             this.chatMsgField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.chatMsgField.Location = new System.Drawing.Point(330, 505);
+            this.chatMsgField.Location = new System.Drawing.Point(330, 518);
             this.chatMsgField.Name = "chatMsgField";
             this.chatMsgField.Size = new System.Drawing.Size(352, 20);
             this.chatMsgField.TabIndex = 132;
@@ -350,7 +351,7 @@
             this.Message,
             this.Time});
             this.chatroomGrid.GridColor = System.Drawing.Color.DodgerBlue;
-            this.chatroomGrid.Location = new System.Drawing.Point(330, 37);
+            this.chatroomGrid.Location = new System.Drawing.Point(330, 50);
             this.chatroomGrid.Name = "chatroomGrid";
             this.chatroomGrid.ReadOnly = true;
             this.chatroomGrid.Size = new System.Drawing.Size(452, 454);
@@ -382,7 +383,7 @@
             this.CheackBlacklistBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
             this.CheackBlacklistBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.CheackBlacklistBtn.ForeColor = System.Drawing.Color.White;
-            this.CheackBlacklistBtn.Location = new System.Drawing.Point(4, 496);
+            this.CheackBlacklistBtn.Location = new System.Drawing.Point(4, 476);
             this.CheackBlacklistBtn.Name = "CheackBlacklistBtn";
             this.CheackBlacklistBtn.Size = new System.Drawing.Size(323, 30);
             this.CheackBlacklistBtn.TabIndex = 136;
@@ -418,12 +419,27 @@
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // btnVIP
+            // 
+            this.btnVIP.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
+            this.btnVIP.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.btnVIP.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVIP.ForeColor = System.Drawing.Color.White;
+            this.btnVIP.Location = new System.Drawing.Point(4, 509);
+            this.btnVIP.Name = "btnVIP";
+            this.btnVIP.Size = new System.Drawing.Size(323, 30);
+            this.btnVIP.TabIndex = 139;
+            this.btnVIP.Text = "Check Feature Permission";
+            this.btnVIP.UseVisualStyleBackColor = false;
+            this.btnVIP.Click += new System.EventHandler(this.btnVIP_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
-            this.ClientSize = new System.Drawing.Size(790, 648);
+            this.ClientSize = new System.Drawing.Size(790, 677);
+            this.Controls.Add(this.btnVIP);
             this.Controls.Add(this.minBtn);
             this.Controls.Add(this.closeBtn);
             this.Controls.Add(this.CheackBlacklistBtn);
@@ -494,6 +510,7 @@
         private System.Windows.Forms.Button minBtn;
         private System.Windows.Forms.Button closeBtn;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btnVIP;
     }
 }
 
