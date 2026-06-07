@@ -135,6 +135,58 @@ namespace AuthVaultix
         public string name { get; set; }
     }
 
+        internal class DtoBasic
+    {
+        [JsonProperty("success")] public bool Success { get; set; }
+        [JsonProperty("message")] public string Msg { get; set; }
+    }
+
+    internal class DtoInit : DtoBasic
+    {
+        [JsonProperty("sessionid")] public string SessId { get; set; }
+        [JsonProperty("appinfo")] public AppInfo AppInfo { get; set; }
+    }
+
+    internal class DtoAuth : DtoBasic
+    {
+        [JsonProperty("info")] public UserInfo Profile { get; set; }
+        [JsonProperty("sessionid")] public string SessId { get; set; }
+        [JsonProperty("permissions")] public List<string> Permissions { get; set; }
+    }
+
+    internal class DtoData : DtoBasic
+    {
+        [JsonProperty("contents")] public string B64Data { get; set; }
+    }
+
+    internal class DtoVar : DtoBasic
+    {
+        [JsonProperty("response")] public string VarData { get; set; }
+    }
+
+    internal class DtoOnline : DtoBasic
+    {
+        [JsonProperty("users")] public List<OnlineUser> UserList { get; set; }
+    }
+
+    internal class DtoChat : DtoBasic
+    {
+        [JsonProperty("code")] public int ErrCode { get; set; }
+        [JsonProperty("remaining_seconds")] public int RemainingSec { get; set; }
+        [JsonProperty("muted_until")] public string MutedTime { get; set; }
+        [JsonProperty("remaining_human")] public string MutedHuman { get; set; }
+    }
+
+    internal class DtoChatHistory : DtoBasic
+    {
+        [JsonProperty("messages")] public List<ChatMessage> Log { get; set; }
+    }
+
+    internal class DtoUpgrade : DtoBasic
+    {
+        [JsonProperty("users")] public List<UpgradeUser> Upgraded { get; set; }
+    }
+
     internal class AuthVaultixCore
     {
         private readonly string _appName;
@@ -1105,57 +1157,5 @@ namespace AuthVaultix
         }
 
         public static event Action<string> OnTamperDetected;
-    }
-
-    internal class DtoBasic
-    {
-        [JsonProperty("success")] public bool Success { get; set; }
-        [JsonProperty("message")] public string Msg { get; set; }
-    }
-
-    internal class DtoInit : DtoBasic
-    {
-        [JsonProperty("sessionid")] public string SessId { get; set; }
-        [JsonProperty("appinfo")] public AppInfo AppInfo { get; set; }
-    }
-
-    internal class DtoAuth : DtoBasic
-    {
-        [JsonProperty("info")] public UserInfo Profile { get; set; }
-        [JsonProperty("sessionid")] public string SessId { get; set; }
-        [JsonProperty("permissions")] public List<string> Permissions { get; set; }
-    }
-
-    internal class DtoData : DtoBasic
-    {
-        [JsonProperty("contents")] public string B64Data { get; set; }
-    }
-
-    internal class DtoVar : DtoBasic
-    {
-        [JsonProperty("response")] public string VarData { get; set; }
-    }
-
-    internal class DtoOnline : DtoBasic
-    {
-        [JsonProperty("users")] public List<OnlineUser> UserList { get; set; }
-    }
-
-    internal class DtoChat : DtoBasic
-    {
-        [JsonProperty("code")] public int ErrCode { get; set; }
-        [JsonProperty("remaining_seconds")] public int RemainingSec { get; set; }
-        [JsonProperty("muted_until")] public string MutedTime { get; set; }
-        [JsonProperty("remaining_human")] public string MutedHuman { get; set; }
-    }
-
-    internal class DtoChatHistory : DtoBasic
-    {
-        [JsonProperty("messages")] public List<ChatMessage> Log { get; set; }
-    }
-
-    internal class DtoUpgrade : DtoBasic
-    {
-        [JsonProperty("users")] public List<UpgradeUser> Upgraded { get; set; }
     }
 }
