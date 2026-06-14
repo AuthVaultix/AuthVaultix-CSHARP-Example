@@ -67,10 +67,10 @@ namespace AuthVaultixNativeAotExample
                 }
                 catch { }
 
-                Console.WriteLine("[!] Application will close.");
-                Console.ResetColor();
-                Thread.Sleep(3000);
-                Environment.Exit(0);
+                //Console.WriteLine("[!] Application will close.");
+               // Console.ResetColor();
+               // Thread.Sleep(3000);
+              //  Environment.Exit(0);
             };
 
             Thread tamperThread = new Thread(() =>
