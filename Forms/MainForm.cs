@@ -27,7 +27,7 @@ namespace Client
                 // Trigger the API report
                 LoginForm.Client.Tamper(reason);
                 MessageBox.Show($"Tamper Detected: {reason}\nYou have been banned.", "Security Violation", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+               // Environment.Exit(0);
             };
         }
 
