@@ -72,7 +72,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthVaultix.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="Drag.cs" />
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>

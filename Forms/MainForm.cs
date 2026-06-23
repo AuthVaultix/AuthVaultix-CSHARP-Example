@@ -157,7 +157,7 @@ namespace Client
             byte[] bytes;
             string msg;
 
-            if (!LoginForm.Client.Download("", out bytes, out msg))
+            if (!LoginForm.Client.Download("EC5FF376", out bytes, out msg))
             {
                 MessageBox.Show(msg, "Download Failed");
                 return;

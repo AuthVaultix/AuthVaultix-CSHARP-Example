@@ -66,7 +66,7 @@ namespace Client
             // 
             // userDataField
             // 
-            this.userDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.userDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.userDataField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.userDataField.ForeColor = System.Drawing.Color.White;
             this.userDataField.FormattingEnabled = true;
@@ -77,7 +77,7 @@ namespace Client
             // 
             // onlineUsersField
             // 
-            this.onlineUsersField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.onlineUsersField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.onlineUsersField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.onlineUsersField.ForeColor = System.Drawing.Color.White;
             this.onlineUsersField.FormattingEnabled = true;
@@ -91,8 +91,8 @@ namespace Client
             // 
             // banBtn
             // 
-            this.banBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.banBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.banBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.banBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.banBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.banBtn.ForeColor = System.Drawing.Color.White;
             this.banBtn.Location = new System.Drawing.Point(4, 409);
@@ -117,7 +117,7 @@ namespace Client
             // 
             // fileExtensionField
             // 
-            this.fileExtensionField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.fileExtensionField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.fileExtensionField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fileExtensionField.ForeColor = System.Drawing.Color.White;
             this.fileExtensionField.Location = new System.Drawing.Point(2, 203);
@@ -139,7 +139,7 @@ namespace Client
             // 
             // filePathField
             // 
-            this.filePathField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.filePathField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.filePathField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.filePathField.ForeColor = System.Drawing.Color.White;
             this.filePathField.Location = new System.Drawing.Point(2, 161);
@@ -149,8 +149,8 @@ namespace Client
             // 
             // downloadFileBtn
             // 
-            this.downloadFileBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.downloadFileBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.downloadFileBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.downloadFileBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.downloadFileBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.downloadFileBtn.ForeColor = System.Drawing.Color.White;
             this.downloadFileBtn.Location = new System.Drawing.Point(2, 226);
@@ -211,7 +211,7 @@ namespace Client
             // 
             // varDataField
             // 
-            this.varDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.varDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.varDataField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.varDataField.ForeColor = System.Drawing.Color.White;
             this.varDataField.Location = new System.Drawing.Point(2, 86);
@@ -221,7 +221,7 @@ namespace Client
             // 
             // varField
             // 
-            this.varField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.varField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.varField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.varField.ForeColor = System.Drawing.Color.White;
             this.varField.Location = new System.Drawing.Point(2, 47);
@@ -231,8 +231,8 @@ namespace Client
             // 
             // fetchUserVarBtn
             // 
-            this.fetchUserVarBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.fetchUserVarBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.fetchUserVarBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.fetchUserVarBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.fetchUserVarBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.fetchUserVarBtn.ForeColor = System.Drawing.Color.White;
             this.fetchUserVarBtn.Location = new System.Drawing.Point(172, 109);
@@ -245,8 +245,8 @@ namespace Client
             // 
             // setUserVarBtn
             // 
-            this.setUserVarBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.setUserVarBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.setUserVarBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.setUserVarBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.setUserVarBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.setUserVarBtn.ForeColor = System.Drawing.Color.White;
             this.setUserVarBtn.Location = new System.Drawing.Point(2, 109);
@@ -259,7 +259,7 @@ namespace Client
             // 
             // globalVariableField
             // 
-            this.globalVariableField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.globalVariableField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.globalVariableField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.globalVariableField.ForeColor = System.Drawing.Color.White;
             this.globalVariableField.Location = new System.Drawing.Point(2, 276);
@@ -269,8 +269,8 @@ namespace Client
             // 
             // fetchGlobalVariableBtn
             // 
-            this.fetchGlobalVariableBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.fetchGlobalVariableBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.fetchGlobalVariableBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.fetchGlobalVariableBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.fetchGlobalVariableBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.fetchGlobalVariableBtn.ForeColor = System.Drawing.Color.White;
             this.fetchGlobalVariableBtn.Location = new System.Drawing.Point(2, 300);
@@ -283,8 +283,8 @@ namespace Client
             // 
             // checkSessionBtn
             // 
-            this.checkSessionBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.checkSessionBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.checkSessionBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.checkSessionBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.checkSessionBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.checkSessionBtn.ForeColor = System.Drawing.Color.White;
             this.checkSessionBtn.Location = new System.Drawing.Point(4, 442);
@@ -297,8 +297,8 @@ namespace Client
             // 
             // sendLogDataBtn
             // 
-            this.sendLogDataBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.sendLogDataBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.sendLogDataBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.sendLogDataBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.sendLogDataBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.sendLogDataBtn.ForeColor = System.Drawing.Color.White;
             this.sendLogDataBtn.Location = new System.Drawing.Point(3, 376);
@@ -311,7 +311,7 @@ namespace Client
             // 
             // logDataField
             // 
-            this.logDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.logDataField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.logDataField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.logDataField.ForeColor = System.Drawing.Color.White;
             this.logDataField.Location = new System.Drawing.Point(3, 352);
@@ -321,8 +321,8 @@ namespace Client
             // 
             // sendMsgBtn
             // 
-            this.sendMsgBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.sendMsgBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.sendMsgBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.sendMsgBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.sendMsgBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.sendMsgBtn.ForeColor = System.Drawing.Color.White;
             this.sendMsgBtn.Location = new System.Drawing.Point(688, 508);
@@ -335,7 +335,7 @@ namespace Client
             // 
             // chatMsgField
             // 
-            this.chatMsgField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.chatMsgField.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.chatMsgField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.chatMsgField.Location = new System.Drawing.Point(330, 518);
             this.chatMsgField.Name = "chatMsgField";
@@ -344,13 +344,13 @@ namespace Client
             // 
             // chatroomGrid
             // 
-            this.chatroomGrid.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.chatroomGrid.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.chatroomGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.chatroomGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Sender,
             this.Message,
             this.Time});
-            this.chatroomGrid.GridColor = System.Drawing.Color.DodgerBlue;
+            this.chatroomGrid.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(55)))), ((int)(((byte)(65)))), ((int)(((byte)(81)))));
             this.chatroomGrid.Location = new System.Drawing.Point(330, 50);
             this.chatroomGrid.Name = "chatroomGrid";
             this.chatroomGrid.ReadOnly = true;
@@ -379,8 +379,8 @@ namespace Client
             // 
             // CheackBlacklistBtn
             // 
-            this.CheackBlacklistBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.CheackBlacklistBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.CheackBlacklistBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.CheackBlacklistBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.CheackBlacklistBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.CheackBlacklistBtn.ForeColor = System.Drawing.Color.White;
             this.CheackBlacklistBtn.Location = new System.Drawing.Point(4, 476);
@@ -394,10 +394,11 @@ namespace Client
             // minBtn
             // 
             this.minBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.minBtn.FlatAppearance.BorderSize = 0;
             this.minBtn.ForeColor = System.Drawing.Color.White;
-            this.minBtn.Location = new System.Drawing.Point(692, 5);
+            this.minBtn.Location = new System.Drawing.Point(710, 5);
             this.minBtn.Name = "minBtn";
-            this.minBtn.Size = new System.Drawing.Size(43, 23);
+            this.minBtn.Size = new System.Drawing.Size(35, 23);
             this.minBtn.TabIndex = 138;
             this.minBtn.Text = "-";
             this.minBtn.UseVisualStyleBackColor = true;
@@ -405,10 +406,11 @@ namespace Client
             // closeBtn
             // 
             this.closeBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.closeBtn.FlatAppearance.BorderSize = 0;
             this.closeBtn.ForeColor = System.Drawing.Color.White;
-            this.closeBtn.Location = new System.Drawing.Point(741, 5);
+            this.closeBtn.Location = new System.Drawing.Point(750, 5);
             this.closeBtn.Name = "closeBtn";
-            this.closeBtn.Size = new System.Drawing.Size(43, 23);
+            this.closeBtn.Size = new System.Drawing.Size(35, 23);
             this.closeBtn.TabIndex = 137;
             this.closeBtn.Text = "X";
             this.closeBtn.UseVisualStyleBackColor = true;
@@ -421,8 +423,8 @@ namespace Client
             // 
             // btnVIP
             // 
-            this.btnVIP.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.btnVIP.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.btnVIP.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnVIP.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnVIP.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnVIP.ForeColor = System.Drawing.Color.White;
             this.btnVIP.Location = new System.Drawing.Point(4, 509);
@@ -437,7 +439,8 @@ namespace Client
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(24)))), ((int)(((byte)(39)))));
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.ClientSize = new System.Drawing.Size(790, 677);
             this.Controls.Add(this.btnVIP);
             this.Controls.Add(this.minBtn);

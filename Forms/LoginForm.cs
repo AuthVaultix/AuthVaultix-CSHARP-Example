@@ -13,7 +13,7 @@ namespace Client
             secret: "",
             version: "1.0"
         );
-
+        
         public LoginForm()
         {
             InitializeComponent();

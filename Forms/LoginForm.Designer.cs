@@ -1,4 +1,4 @@
-﻿namespace Client
+namespace Client
 {
     partial class LoginForm
     {
@@ -52,45 +52,47 @@
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI Semibold", 26F, System.Drawing.FontStyle.Bold);
-            this.label3.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label3.Location = new System.Drawing.Point(153, 358);
+            this.label3.AutoSize = false;
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular);
+            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(163)))), ((int)(((byte)(175)))));
+            this.label3.Location = new System.Drawing.Point(50, 85);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(207, 47);
+            this.label3.Size = new System.Drawing.Size(300, 25);
             this.label3.TabIndex = 117;
             this.label3.Text = "C# Example";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI Semibold", 26F, System.Drawing.FontStyle.Bold);
-            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.label2.Location = new System.Drawing.Point(87, 311);
+            this.label2.AutoSize = false;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 24F, System.Drawing.FontStyle.Bold);
+            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
+            this.label2.Location = new System.Drawing.Point(50, 40);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(208, 47);
+            this.label2.Size = new System.Drawing.Size(300, 45);
             this.label2.TabIndex = 116;
-            this.label2.Text = "AuthvAultix";
+            this.label2.Text = "AuthVaultix";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(64, 38);
+            this.pictureBox1.Visible = false;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(286, 289);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.Size = new System.Drawing.Size(0, 0);
             this.pictureBox1.TabIndex = 115;
             this.pictureBox1.TabStop = false;
             // 
             // minBtn
             // 
             this.minBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.minBtn.FlatAppearance.BorderSize = 0;
             this.minBtn.ForeColor = System.Drawing.Color.White;
-            this.minBtn.Location = new System.Drawing.Point(702, 5);
+            this.minBtn.Location = new System.Drawing.Point(320, 5);
             this.minBtn.Name = "minBtn";
-            this.minBtn.Size = new System.Drawing.Size(43, 23);
+            this.minBtn.Size = new System.Drawing.Size(35, 23);
             this.minBtn.TabIndex = 114;
             this.minBtn.Text = "-";
             this.minBtn.UseVisualStyleBackColor = true;
@@ -99,10 +101,11 @@
             // closeBtn
             // 
             this.closeBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.closeBtn.FlatAppearance.BorderSize = 0;
             this.closeBtn.ForeColor = System.Drawing.Color.White;
-            this.closeBtn.Location = new System.Drawing.Point(751, 5);
+            this.closeBtn.Location = new System.Drawing.Point(360, 5);
             this.closeBtn.Name = "closeBtn";
-            this.closeBtn.Size = new System.Drawing.Size(43, 23);
+            this.closeBtn.Size = new System.Drawing.Size(35, 23);
             this.closeBtn.TabIndex = 113;
             this.closeBtn.Text = "X";
             this.closeBtn.UseVisualStyleBackColor = true;
@@ -111,9 +114,9 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label7.Location = new System.Drawing.Point(481, 198);
+            this.label7.Font = new System.Drawing.Font("Segoe UI Semibold", 9F);
+            this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(163)))), ((int)(((byte)(175)))));
+            this.label7.Location = new System.Drawing.Point(50, 290);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(40, 15);
@@ -123,9 +126,9 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label6.Location = new System.Drawing.Point(481, 148);
+            this.label6.Font = new System.Drawing.Font("Segoe UI Semibold", 9F);
+            this.label6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(163)))), ((int)(((byte)(175)))));
+            this.label6.Location = new System.Drawing.Point(50, 235);
             this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(71, 15);
@@ -135,9 +138,9 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label5.Location = new System.Drawing.Point(481, 98);
+            this.label5.Font = new System.Drawing.Font("Segoe UI Semibold", 9F);
+            this.label5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(163)))), ((int)(((byte)(175)))));
+            this.label5.Location = new System.Drawing.Point(50, 180);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(62, 15);
@@ -147,9 +150,9 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label4.Location = new System.Drawing.Point(478, 49);
+            this.label4.Font = new System.Drawing.Font("Segoe UI Semibold", 9F);
+            this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(163)))), ((int)(((byte)(175)))));
+            this.label4.Location = new System.Drawing.Point(50, 125);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(65, 15);
@@ -158,13 +161,13 @@
             // 
             // forgotBtn
             // 
-            this.forgotBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.forgotBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.forgotBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
+            this.forgotBtn.FlatAppearance.BorderSize = 0;
             this.forgotBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.forgotBtn.ForeColor = System.Drawing.Color.White;
-            this.forgotBtn.Location = new System.Drawing.Point(481, 371);
+            this.forgotBtn.Location = new System.Drawing.Point(205, 450);
             this.forgotBtn.Name = "forgotBtn";
-            this.forgotBtn.Size = new System.Drawing.Size(307, 23);
+            this.forgotBtn.Size = new System.Drawing.Size(145, 30);
             this.forgotBtn.TabIndex = 108;
             this.forgotBtn.Text = "Forgot Password ?";
             this.forgotBtn.UseVisualStyleBackColor = false;
@@ -172,13 +175,13 @@
             // 
             // upgradeBtn
             // 
-            this.upgradeBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.upgradeBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.upgradeBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
+            this.upgradeBtn.FlatAppearance.BorderSize = 0;
             this.upgradeBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.upgradeBtn.ForeColor = System.Drawing.Color.White;
-            this.upgradeBtn.Location = new System.Drawing.Point(481, 341);
+            this.upgradeBtn.Location = new System.Drawing.Point(50, 450);
             this.upgradeBtn.Name = "upgradeBtn";
-            this.upgradeBtn.Size = new System.Drawing.Size(307, 23);
+            this.upgradeBtn.Size = new System.Drawing.Size(145, 30);
             this.upgradeBtn.TabIndex = 107;
             this.upgradeBtn.Text = "Upgrade ? ";
             this.upgradeBtn.UseVisualStyleBackColor = false;
@@ -186,13 +189,13 @@
             // 
             // LicenceBitn
             // 
-            this.LicenceBitn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.LicenceBitn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.LicenceBitn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.LicenceBitn.FlatAppearance.BorderSize = 0;
             this.LicenceBitn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.LicenceBitn.ForeColor = System.Drawing.Color.White;
-            this.LicenceBitn.Location = new System.Drawing.Point(481, 312);
+            this.LicenceBitn.Location = new System.Drawing.Point(50, 405);
             this.LicenceBitn.Name = "LicenceBitn";
-            this.LicenceBitn.Size = new System.Drawing.Size(307, 23);
+            this.LicenceBitn.Size = new System.Drawing.Size(300, 35);
             this.LicenceBitn.TabIndex = 106;
             this.LicenceBitn.Text = "License Log In/Register";
             this.LicenceBitn.UseVisualStyleBackColor = false;
@@ -200,13 +203,13 @@
             // 
             // RegisterBtn
             // 
-            this.RegisterBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.RegisterBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.RegisterBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
+            this.RegisterBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.RegisterBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.RegisterBtn.ForeColor = System.Drawing.Color.White;
-            this.RegisterBtn.Location = new System.Drawing.Point(481, 283);
+            this.RegisterBtn.Location = new System.Drawing.Point(205, 360);
             this.RegisterBtn.Name = "RegisterBtn";
-            this.RegisterBtn.Size = new System.Drawing.Size(307, 23);
+            this.RegisterBtn.Size = new System.Drawing.Size(145, 35);
             this.RegisterBtn.TabIndex = 105;
             this.RegisterBtn.Text = "Register";
             this.RegisterBtn.UseVisualStyleBackColor = false;
@@ -214,13 +217,13 @@
             // 
             // LoginBtn
             // 
-            this.LoginBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(100)))), ((int)(((byte)(242)))));
-            this.LoginBtn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(22)))), ((int)(((byte)(29)))), ((int)(((byte)(39)))));
+            this.LoginBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.LoginBtn.FlatAppearance.BorderSize = 0;
             this.LoginBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.LoginBtn.ForeColor = System.Drawing.Color.White;
-            this.LoginBtn.Location = new System.Drawing.Point(481, 253);
+            this.LoginBtn.Location = new System.Drawing.Point(50, 360);
             this.LoginBtn.Name = "LoginBtn";
-            this.LoginBtn.Size = new System.Drawing.Size(307, 23);
+            this.LoginBtn.Size = new System.Drawing.Size(145, 35);
             this.LoginBtn.TabIndex = 104;
             this.LoginBtn.Text = "Login";
             this.LoginBtn.UseVisualStyleBackColor = false;
@@ -228,54 +231,55 @@
             // 
             // emailFild
             // 
-            this.emailFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.emailFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.emailFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.emailFild.ForeColor = System.Drawing.Color.White;
-            this.emailFild.Location = new System.Drawing.Point(481, 215);
+            this.emailFild.Location = new System.Drawing.Point(50, 310);
             this.emailFild.Multiline = true;
             this.emailFild.Name = "emailFild";
-            this.emailFild.Size = new System.Drawing.Size(307, 21);
+            this.emailFild.Size = new System.Drawing.Size(300, 28);
             this.emailFild.TabIndex = 102;
             // 
             // keyFild
             // 
-            this.keyFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.keyFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.keyFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.keyFild.ForeColor = System.Drawing.Color.White;
-            this.keyFild.Location = new System.Drawing.Point(481, 165);
+            this.keyFild.Location = new System.Drawing.Point(50, 255);
             this.keyFild.Multiline = true;
             this.keyFild.Name = "keyFild";
-            this.keyFild.Size = new System.Drawing.Size(307, 21);
+            this.keyFild.Size = new System.Drawing.Size(300, 28);
             this.keyFild.TabIndex = 101;
             // 
             // pasFild
             // 
-            this.pasFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.pasFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.pasFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pasFild.ForeColor = System.Drawing.Color.White;
-            this.pasFild.Location = new System.Drawing.Point(481, 115);
+            this.pasFild.Location = new System.Drawing.Point(50, 200);
             this.pasFild.Multiline = true;
             this.pasFild.Name = "pasFild";
-            this.pasFild.Size = new System.Drawing.Size(307, 21);
+            this.pasFild.Size = new System.Drawing.Size(300, 28);
             this.pasFild.TabIndex = 103;
             // 
             // userFild
             // 
-            this.userFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
+            this.userFild.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(31)))), ((int)(((byte)(41)))), ((int)(((byte)(55)))));
             this.userFild.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.userFild.ForeColor = System.Drawing.Color.White;
-            this.userFild.Location = new System.Drawing.Point(481, 66);
+            this.userFild.Location = new System.Drawing.Point(50, 145);
             this.userFild.Multiline = true;
             this.userFild.Name = "userFild";
-            this.userFild.Size = new System.Drawing.Size(307, 21);
+            this.userFild.Size = new System.Drawing.Size(300, 28);
             this.userFild.TabIndex = 100;
             // 
             // LoginForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(61)))), ((int)(((byte)(79)))));
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(24)))), ((int)(((byte)(39)))));
+            this.ClientSize = new System.Drawing.Size(400, 500);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.pictureBox1);
