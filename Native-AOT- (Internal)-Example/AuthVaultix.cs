@@ -1139,7 +1139,15 @@ namespace AuthVaultix
             Console.WriteLine(exceptionDetail);
             Console.WriteLine("=======================================");
             Console.ResetColor();
-            Thread.Sleep(3000);
+
+            // Show popup message to explain the failure to the user
+            System.Windows.Forms.MessageBox.Show(
+                $"A fatal error occurred:\n\n{exceptionDetail}\n\nThe application will now close.",
+                "Subsystem Failure",
+                System.Windows.Forms.MessageBoxButtons.OK,
+                System.Windows.Forms.MessageBoxIcon.Error
+            );
+
             Environment.Exit(1);
         }
     }
