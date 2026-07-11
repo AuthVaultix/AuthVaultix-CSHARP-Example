@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Threading;
+using System.Management;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -130,7 +131,7 @@ namespace AuthVaultix
         public string name { get; set; }
     }
 
-        internal class DtoBasic
+    internal class DtoBasic
     {
         [JsonProperty("success")] public bool Success { get; set; }
         [JsonProperty("message")] public string Msg { get; set; }
@@ -268,6 +269,7 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
                 .Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
@@ -321,6 +323,7 @@ namespace AuthVaultix
                 .WithValue("key", licenseKey)
                 .WithValue("email", email)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("version", _version)
                 .Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "register", out _);
@@ -1320,9 +1323,9 @@ namespace AuthVaultix
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         private static extern bool CheckRemoteDebuggerPresent(IntPtr hProcess, ref bool isDebuggerPresent);
 
-        private static readonly string[] BadProcesses = { 
-            "dnspy", "x64dbg", "x32dbg", "ollydbg", "cheatengine", "wireshark", 
-            "httpdebugger", "fiddler", "processhacker", "scylla", "megadumper" 
+        private static readonly string[] BadProcesses = {
+            "dnspy", "x64dbg", "x32dbg", "ollydbg", "cheatengine", "wireshark",
+            "httpdebugger", "fiddler", "processhacker", "scylla", "megadumper"
         };
 
         public static void Check()
@@ -1348,7 +1351,7 @@ namespace AuthVaultix
             // Note: LoginForm.Client or equivalent needs to be accessible.
             // We'll let the MainForm handle the reporting if possible, 
             // or we can pass the client instance here.
-            
+
             // For now, let's throw an exception that MainForm can catch 
             // or just define a static event.
             OnTamperDetected?.Invoke(reason);
