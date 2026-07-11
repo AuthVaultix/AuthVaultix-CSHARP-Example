@@ -188,7 +188,7 @@ namespace AuthVaultix
         private readonly string _ownerId;
         private readonly string _secret;
         private readonly string _version;
-        private readonly string _apiUrl = "https://authvaultix.com/api/1.0/";
+        private readonly string _apiUrl = "https://authvaultix.com/api/testing/";
 
         public string RisponceCollection { get; internal set; } = "";
         public string LastMessage1 { get; internal set; }
@@ -268,6 +268,7 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
                 .Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
@@ -321,6 +322,7 @@ namespace AuthVaultix
                 .WithValue("key", licenseKey)
                 .WithValue("email", email)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("version", _version)
                 .Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "register", out _);
