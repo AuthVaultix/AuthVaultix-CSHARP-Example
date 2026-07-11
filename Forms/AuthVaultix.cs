@@ -188,7 +188,7 @@ namespace AuthVaultix
         private readonly string _ownerId;
         private readonly string _secret;
         private readonly string _version;
-        private readonly string _apiUrl = "https://authvaultix.com/api/testing/";
+        private readonly string _apiUrl = "https://authvaultix.com/api/1.0/";
 
         public string RisponceCollection { get; internal set; } = "";
         public string LastMessage1 { get; internal set; }
