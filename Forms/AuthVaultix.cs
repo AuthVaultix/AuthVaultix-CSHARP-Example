@@ -1,27 +1,22 @@
-using Microsoft.Win32;
-using Newtonsoft.Json;
 using System;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Management;
-using System.Net;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace AuthVaultix
 {
@@ -267,6 +262,12 @@ namespace AuthVaultix
                 .WithValue("username", username)
                 .WithValue("pass", password)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("os", SystemInfoCollector.GetOSVersion())
+                .WithValue("platform", SystemInfoCollector.GetPlatform())
+                .WithValue("device", SystemInfoCollector.GetDeviceType())
+                .WithValue("architecture", SystemInfoCollector.GetArchitecture())
+                .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
+                .WithValue("ram", SystemInfoCollector.GetRamGB())
                 .Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
@@ -1088,6 +1089,203 @@ namespace AuthVaultix
             }
         }
     }
+
+    internal static class SystemInfoCollector
+    {
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private class MEMORYSTATUSEX
+        {
+            public uint dwLength;
+            public uint dwMemoryLoad;
+            public ulong ullTotalPhys;
+            public ulong ullAvailPhys;
+            public ulong ullTotalPageFile;
+            public ulong ullAvailPageFile;
+            public ulong ullTotalVirtual;
+            public ulong ullAvailVirtual;
+            public ulong ullAvailExtendedVirtual;
+            public MEMORYSTATUSEX()
+            {
+                this.dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
+            }
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
+
+        public static string GetOSVersion()
+        {
+            string osName = "";
+            int major = 0;
+            int minor = 0;
+            int build = 0;
+
+            try
+            {
+                using (var searcher = new System.Management.ManagementObjectSearcher("Select Caption from Win32_OperatingSystem"))
+                {
+                    foreach (var item in searcher.Get())
+                    {
+                        var caption = item["Caption"];
+                        if (caption != null)
+                        {
+                            osName = caption.ToString();
+                            break;
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            // Clean up the name if it contains "Microsoft "
+            if (!string.IsNullOrEmpty(osName))
+            {
+                if (osName.StartsWith("Microsoft "))
+                {
+                    osName = osName.Substring("Microsoft ".Length);
+                }
+            }
+            else
+            {
+                // Fallback to registry if WMI fails
+                osName = "Windows";
+                try
+                {
+                    using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                    {
+                        if (key != null)
+                        {
+                            var productName = key.GetValue("ProductName")?.ToString();
+                            if (!string.IsNullOrEmpty(productName))
+                            {
+                                osName = productName;
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            try
+            {
+                using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+                {
+                    if (key != null)
+                    {
+                        var buildStr = key.GetValue("CurrentBuild")?.ToString();
+                        if (string.IsNullOrEmpty(buildStr))
+                        {
+                            buildStr = key.GetValue("CurrentBuildNumber")?.ToString();
+                        }
+                        if (!string.IsNullOrEmpty(buildStr))
+                        {
+                            int.TryParse(buildStr, out build);
+                        }
+
+                        var majorVal = key.GetValue("CurrentMajorVersionNumber");
+                        if (majorVal != null) int.TryParse(majorVal.ToString(), out major);
+
+                        var minorVal = key.GetValue("CurrentMinorVersionNumber");
+                        if (minorVal != null) int.TryParse(minorVal.ToString(), out minor);
+                    }
+                }
+            }
+            catch { }
+
+            if (build == 0)
+            {
+                build = Environment.OSVersion.Version.Build;
+            }
+            if (major == 0)
+            {
+                major = Environment.OSVersion.Version.Major;
+                minor = Environment.OSVersion.Version.Minor;
+            }
+
+            // Adjust name for Windows 11 as ProductName might report Windows 10
+            if (osName.Contains("Windows 10") && build >= 22000)
+            {
+                osName = osName.Replace("Windows 10", "Windows 11");
+            }
+            else if (build >= 22000 && !osName.Contains("Windows 11"))
+            {
+                if (osName.Contains("Windows 10"))
+                    osName = osName.Replace("Windows 10", "Windows 11");
+                else
+                    osName = "Windows 11 " + osName.Replace("Windows", "").Trim();
+            }
+
+            // Correct major/minor version 
+            if (build >= 10240 && major < 10)
+            {
+                major = 10;
+                minor = 0;
+            }
+
+            return $"{osName} ({major}.{minor}.{build})";
+        }
+
+        public static string GetPlatform() => "native";
+
+        public static string GetDeviceType() => "Desktop";
+
+        public static string GetArchitecture()
+        {
+            try
+            {
+                return System.Runtime.InteropServices.RuntimeInformation.OSArchitecture.ToString();
+            }
+            catch
+            {
+                return Environment.Is64BitOperatingSystem ? "X64" : "X86";
+            }
+        }
+
+        public static string GetCpuCores()
+        {
+            int physicalCores = 0;
+            int logicalProcessors = Environment.ProcessorCount;
+            try
+            {
+                using (var searcher = new System.Management.ManagementObjectSearcher("Select NumberOfCores from Win32_Processor"))
+                {
+                    foreach (var item in searcher.Get())
+                    {
+                        var cores = item["NumberOfCores"];
+                        if (cores != null)
+                        {
+                            physicalCores += Convert.ToInt32(cores);
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            if (physicalCores == 0)
+            {
+                physicalCores = logicalProcessors;
+            }
+
+            return $"{physicalCores} Cores / {logicalProcessors} Threads";
+        }
+
+        public static string GetRamGB()
+        {
+            try
+            {
+                var mem = new MEMORYSTATUSEX();
+                if (GlobalMemoryStatusEx(mem))
+                {
+                    double gb = mem.ullTotalPhys / (1024.0 * 1024.0 * 1024.0);
+                    return Math.Round(gb).ToString();
+                }
+            }
+            catch { }
+            return "0";
+        }
+    }
+
 
     internal static class Diagnostics
     {
