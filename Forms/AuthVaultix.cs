@@ -130,7 +130,7 @@ namespace AuthVaultix
         public string name { get; set; }
     }
 
-        internal class DtoBasic
+    internal class DtoBasic
     {
         [JsonProperty("success")] public bool Success { get; set; }
         [JsonProperty("message")] public string Msg { get; set; }
@@ -322,6 +322,12 @@ namespace AuthVaultix
                 .WithValue("key", licenseKey)
                 .WithValue("email", email)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("os", SystemInfoCollector.GetOSVersion())
+                .WithValue("platform", SystemInfoCollector.GetPlatform())
+                .WithValue("device", SystemInfoCollector.GetDeviceType())
+                .WithValue("architecture", SystemInfoCollector.GetArchitecture())
+                .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
+                .WithValue("ram", SystemInfoCollector.GetRamGB())
                 .WithValue("version", _version)
                 .Compile();
 
@@ -347,6 +353,13 @@ namespace AuthVaultix
                 .WithContext(_appName, _ownerId, SessionId)
                 .WithValue("key", licenseKey)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("os", SystemInfoCollector.GetOSVersion())
+                .WithValue("platform", SystemInfoCollector.GetPlatform())
+                .WithValue("device", SystemInfoCollector.GetDeviceType())
+                .WithValue("architecture", SystemInfoCollector.GetArchitecture())
+                .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
+                .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
                 .Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "license", out _);
@@ -1322,9 +1335,9 @@ namespace AuthVaultix
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
         private static extern bool CheckRemoteDebuggerPresent(IntPtr hProcess, ref bool isDebuggerPresent);
 
-        private static readonly string[] BadProcesses = { 
-            "dnspy", "x64dbg", "x32dbg", "ollydbg", "cheatengine", "wireshark", 
-            "httpdebugger", "fiddler", "processhacker", "scylla", "megadumper" 
+        private static readonly string[] BadProcesses = {
+            "dnspy", "x64dbg", "x32dbg", "ollydbg", "cheatengine", "wireshark",
+            "httpdebugger", "fiddler", "processhacker", "scylla", "megadumper"
         };
 
         public static void Check()
@@ -1350,7 +1363,7 @@ namespace AuthVaultix
             // Note: LoginForm.Client or equivalent needs to be accessible.
             // We'll let the MainForm handle the reporting if possible, 
             // or we can pass the client instance here.
-            
+
             // For now, let's throw an exception that MainForm can catch 
             // or just define a static event.
             OnTamperDetected?.Invoke(reason);
