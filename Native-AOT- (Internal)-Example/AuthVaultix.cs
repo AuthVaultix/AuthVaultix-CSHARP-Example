@@ -289,6 +289,7 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
                 .Compile();
 
             string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
@@ -343,6 +344,13 @@ namespace AuthVaultix
                 .WithValue("key", licenseKey)
                 .WithValue("email", email)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("os", SystemInfoCollector.GetOSVersion())
+                .WithValue("platform", SystemInfoCollector.GetPlatform())
+                .WithValue("device", SystemInfoCollector.GetDeviceType())
+                .WithValue("architecture", SystemInfoCollector.GetArchitecture())
+                .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
+                .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
                 .Compile();
 
             string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "register", out _);
@@ -368,6 +376,13 @@ namespace AuthVaultix
                 .WithContext(_appName, _ownerId, SessionId!)
                 .WithValue("key", licenseKey)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("os", SystemInfoCollector.GetOSVersion())
+                .WithValue("platform", SystemInfoCollector.GetPlatform())
+                .WithValue("device", SystemInfoCollector.GetDeviceType())
+                .WithValue("architecture", SystemInfoCollector.GetArchitecture())
+                .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
+                .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
                 .Compile();
 
             string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "license", out _);
