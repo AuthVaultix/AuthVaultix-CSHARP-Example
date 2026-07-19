@@ -13,8 +13,9 @@ namespace AuthVaultixCSharpConsoleExample
 
    		 appName: "",   // Replace with your App Name
    		 ownerId: "",   // Replace with your Owner ID
-    		 secret: "",    // Replace with your Secret Key
+    	 secret: "",    // Replace with your Secret Key
    		 version: "1.0" // Current Version
+      //"Your_Path_Here" // token path here
         );
 
         private static void SafeClear()
