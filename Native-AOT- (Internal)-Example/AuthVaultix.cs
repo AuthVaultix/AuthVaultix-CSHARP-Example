@@ -23,9 +23,9 @@ namespace AuthVaultix
     {
         private readonly AuthVaultixCore _core;
 
-        public AuthVaultixClient(string appName, string ownerId, string secret, string version)
+        public AuthVaultixClient(string appName, string ownerId, string secret, string version, string tokenPath = "")
         {
-            _core = new AuthVaultixCore(appName, ownerId, secret, version);
+            _core = new AuthVaultixCore(appName, ownerId, secret, version, tokenPath);
         }
 
         public string RisponceCollection => _core.RisponceCollection;
@@ -43,6 +43,8 @@ namespace AuthVaultix
         public bool Check() => _core.ValidateSession();
         public bool Register(string username, string password, string licenseKey, string email = "") => _core.RegisterAccount(username, password, licenseKey, email);
         public bool LicenseLogin(string licenseKey) => _core.LicenseAccess(licenseKey);
+        public bool WebLogin() => _core.WebLogin();
+        public void Button(string buttonName) => _core.Button(buttonName);
         public bool Log(string message, out string? serverMessage) => _core.SendLog(message, out serverMessage);
         public bool Download(string fileId, out byte[]? fileBytes, out string? serverMessage) => _core.RetrieveFile(fileId, out fileBytes, out serverMessage);
         public bool FetchOnline(out List<OnlineUser>? users, out string? serverMessage) => _core.GetOnlineClients(out users, out serverMessage);
@@ -206,6 +208,7 @@ namespace AuthVaultix
         private readonly string _ownerId;
         private readonly string _secret;
         private readonly string _version;
+        private readonly string? _tokenPath;
         private readonly string _apiUrl = "https://authvaultix.com/api/1.0/";
 
         public string RisponceCollection { get; internal set; } = "";
@@ -221,7 +224,7 @@ namespace AuthVaultix
 
         private string _encryptionKey = string.Empty;
 
-        public AuthVaultixCore(string appName, string ownerId, string secret, string version)
+        public AuthVaultixCore(string appName, string ownerId, string secret, string version, string tokenPath = "")
         {
             if (string.IsNullOrWhiteSpace(appName) || string.IsNullOrWhiteSpace(ownerId) || string.IsNullOrWhiteSpace(secret) || string.IsNullOrWhiteSpace(version))
             {
@@ -231,6 +234,7 @@ namespace AuthVaultix
             _ownerId = ownerId;
             _secret = secret;
             _version = version;
+            _tokenPath = tokenPath;
         }
 
         private void EnsureReady()
@@ -252,13 +256,25 @@ namespace AuthVaultix
             }
             string hash = VaultixCrypto.FileHash(processPath);
             
-            var payload = new PayloadBuilder("init")
+            // Token file se read karo agar path diya hua hai
+            string token = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { token = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("init")
                 .WithValue("ver", _version)
                 .WithValue("enckey", iv)
                 .WithValue("hash", hash)
                 .WithValue("name", _appName)
-                .WithValue("ownerid", _ownerId)
-                .Compile();
+                .WithValue("ownerid", _ownerId);
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                builder.WithValue("token", token);
+            }
+            var payload = builder.Compile();
 
             string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "init", out _);
             if (resp == "Authvaultix_Invalid") Diagnostics.Crash("App not found");
@@ -278,7 +294,14 @@ namespace AuthVaultix
             RisponceCollection = "";
             EnsureReady();
 
-            var payload = new PayloadBuilder("login")
+            // Token file se read karo agar path diya hua hai
+            string token = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { token = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("login")
                 .WithContext(_appName, _ownerId, SessionId!)
                 .WithValue("username", username)
                 .WithValue("pass", password)
@@ -289,8 +312,13 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
-                .WithValue("version", _version)
-                .Compile();
+                .WithValue("version", _version);
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                builder.WithValue("token", token);
+            }
+            var payload = builder.Compile();
 
             string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
             if (resp == null) return false;
@@ -337,7 +365,14 @@ namespace AuthVaultix
             RisponceCollection = "";
             EnsureReady();
 
-            var payload = new PayloadBuilder("register")
+            // Token file se read karo agar path diya hua hai
+            string token = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { token = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("register")
                 .WithContext(_appName, _ownerId, SessionId!)
                 .WithValue("username", username)
                 .WithValue("pass", password)
@@ -350,8 +385,13 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
-                .WithValue("version", _version)
-                .Compile();
+                .WithValue("version", _version);
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                builder.WithValue("token", token);
+            }
+            var payload = builder.Compile();
 
             string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "register", out _);
             if (resp == null) return false;
@@ -372,7 +412,15 @@ namespace AuthVaultix
         public bool LicenseAccess(string licenseKey)
         {
             EnsureReady();
-            var payload = new PayloadBuilder("license")
+
+            // Token file se read karo agar path diya hua hai
+            string token = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { token = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("license")
                 .WithContext(_appName, _ownerId, SessionId!)
                 .WithValue("key", licenseKey)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
@@ -382,8 +430,13 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
-                .WithValue("version", _version)
-                .Compile();
+                .WithValue("version", _version);
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                builder.WithValue("token", token);
+            }
+            var payload = builder.Compile();
 
             string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "license", out _);
             if (resp == null) return false;
@@ -988,6 +1041,137 @@ namespace AuthVaultix
             if (string.IsNullOrEmpty(feature) || UserPermissions == null) return false;
             return UserPermissions.Contains(feature);
         }
+
+        public bool WebLogin()
+        {
+            EnsureReady();
+
+            string datastore, datastore2, outputten;
+
+            start:
+
+            HttpListener listener = new HttpListener();
+            outputten = "handshake";
+            outputten = "http://localhost:1337/" + outputten + "/";
+
+            listener.Prefixes.Add(outputten);
+            listener.Start();
+
+            HttpListenerContext context = listener.GetContext();
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse responsepp = context.Response;
+
+            responsepp.AddHeader("Access-Control-Allow-Methods", "GET, POST");
+            responsepp.AddHeader("Access-Control-Allow-Origin", "*");
+            responsepp.AddHeader("Via", "AuthVaultix");
+
+            if (request.HttpMethod == "OPTIONS")
+            {
+                responsepp.StatusCode = (int)HttpStatusCode.OK;
+                Thread.Sleep(1);
+                listener.Stop();
+                goto start;
+            }
+
+            listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
+            listener.UnsafeConnectionNtlmAuthentication = true;
+            listener.IgnoreWriteExceptions = true;
+
+            string? user = request.QueryString["user"];
+            string? token = request.QueryString["token"];
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(token))
+            {
+                string data = request.RawUrl ?? "";
+                datastore2 = data.Replace("/handshake?user=", "").Replace("&token=", " ");
+                datastore = datastore2;
+                string[] parts = datastore.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2)
+                {
+                    user = parts[0];
+                    token = parts[1];
+                }
+            }
+
+            var payload = new PayloadBuilder("login")
+                .WithContext(_appName, _ownerId, SessionId!)
+                .WithValue("username", user ?? "")
+                .WithValue("token", token ?? "")
+                .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("os", SystemInfoCollector.GetOSVersion())
+                .WithValue("platform", SystemInfoCollector.GetPlatform())
+                .WithValue("device", SystemInfoCollector.GetDeviceType())
+                .WithValue("architecture", SystemInfoCollector.GetArchitecture())
+                .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
+                .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
+                .Compile();
+
+            string? resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
+            bool success = false;
+            if (resp != null)
+            {
+                var dto = JsonSerializer.Deserialize(resp, AuthVaultixJsonContext.Default.DtoAuth);
+                success = dto != null && dto.Success;
+
+                if (success && dto != null)
+                {
+                    CurrentUser = dto.Profile;
+                    UserPermissions = dto.Permissions ?? new List<string>();
+                    if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
+
+                    responsepp.StatusCode = 420;
+                    responsepp.StatusDescription = "SHEESH";
+                }
+                else
+                {
+                    RisponceCollection = dto?.Msg ?? "Web login failed";
+                    responsepp.StatusCode = (int)HttpStatusCode.OK;
+                    responsepp.StatusDescription = dto?.Msg ?? "Failed";
+                }
+            }
+            else
+            {
+                responsepp.StatusCode = (int)HttpStatusCode.OK;
+                responsepp.StatusDescription = "Failed";
+            }
+
+            byte[] buffer = Encoding.UTF8.GetBytes("Complete");
+            responsepp.ContentLength64 = buffer.Length;
+            using (Stream output = responsepp.OutputStream)
+            {
+                output.Write(buffer, 0, buffer.Length);
+            }
+            Thread.Sleep(1);
+            listener.Stop();
+
+            return success;
+        }
+
+        public void Button(string buttonName)
+        {
+            EnsureReady();
+
+            HttpListener listener = new HttpListener();
+            string prefix = $"http://localhost:1337/{buttonName}/";
+            listener.Prefixes.Add(prefix);
+            listener.Start();
+
+            HttpListenerContext context = listener.GetContext();
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse responsepp = context.Response;
+
+            responsepp.AddHeader("Access-Control-Allow-Methods", "GET, POST");
+            responsepp.AddHeader("Access-Control-Allow-Origin", "*");
+            responsepp.AddHeader("Via", "AuthVaultix");
+            responsepp.StatusCode = 420;
+            responsepp.StatusDescription = "SHEESH";
+
+            listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
+            listener.UnsafeConnectionNtlmAuthentication = true;
+            listener.IgnoreWriteExceptions = true;
+
+            listener.Stop();
+        }
     }
 
     internal class PayloadBuilder
@@ -1333,6 +1517,9 @@ namespace AuthVaultix
 
     internal static class Diagnostics
     {
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int MessageBox(IntPtr hWnd, string text, string caption, uint type);
+
         [System.Diagnostics.CodeAnalysis.DoesNotReturn]
         public static void Crash(string exceptionDetail)
         {
@@ -1345,12 +1532,12 @@ namespace AuthVaultix
             Console.WriteLine("=======================================");
             Console.ResetColor();
 
-            // Show popup message to explain the failure to the user
-            System.Windows.Forms.MessageBox.Show(
+            // Show popup message to explain the failure to the user using Win32 API directly (Native AOT compatible)
+            MessageBox(
+                IntPtr.Zero,
                 $"A fatal error occurred:\n\n{exceptionDetail}\n\nThe application will now close.",
                 "Subsystem Failure",
-                System.Windows.Forms.MessageBoxButtons.OK,
-                System.Windows.Forms.MessageBoxIcon.Error
+                0x00000010 /* MB_ICONERROR */
             );
 
             Environment.Exit(1);

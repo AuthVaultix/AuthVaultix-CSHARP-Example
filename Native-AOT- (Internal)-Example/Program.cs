@@ -9,11 +9,11 @@ namespace AuthVaultixNativeAotExample
     internal class Program
     {
         private static readonly AuthVaultixClient Client = new AuthVaultixClient(
-
-   		 appName: "",   // Replace with your App Name
-   		 ownerId: "",   // Replace with your Owner ID
-    		 secret: "",    // Replace with your Secret Key
-   		 version: "1.0" // Current Version
+            appName: "",   // Replace with your App Name
+            ownerId: "",   // Replace with your Owner ID
+            secret: "",    // Replace with your Secret Key
+            version: "1.0" // Current Version
+         // tokenPath: @"C:\Users\Downloads\"
         );
 
         private static void SafeClear()
@@ -141,7 +141,8 @@ namespace AuthVaultixNativeAotExample
                 Console.WriteLine("2. Register");
                 Console.WriteLine("3. License Key Login");
                 Console.WriteLine("4. Forgot Password");
-                Console.WriteLine("5. Exit");
+                Console.WriteLine("5. Web Login (Dashboard)");
+                Console.WriteLine("6. Exit");
                 Console.WriteLine(new string('-', 35));
                 Console.Write("Choose an option: ");
 
@@ -162,6 +163,9 @@ namespace AuthVaultixNativeAotExample
                         HandleForgotPassword();
                         break;
                     case "5":
+                        HandleWebLogin();
+                        break;
+                    case "6":
                         Console.WriteLine("\nGoodbye!");
                         return;
                     default:
@@ -171,6 +175,34 @@ namespace AuthVaultixNativeAotExample
                         SafeReadKey();
                         break;
                 }
+            }
+        }
+
+        private static void HandleWebLogin()
+        {
+            SafeClear();
+            PrintHeader();
+            Console.WriteLine(" >>> WEB LOGIN <<< ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("[*] Starting Local Server on http://localhost:1337/handshake/ ...");
+            Console.WriteLine("[*] Waiting for browser handshake... Please log in from the web dashboard.");
+            Console.ResetColor();
+
+            if (Client.WebLogin())
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n[+] Login Successful via Web Dashboard!");
+                Console.ResetColor();
+                Thread.Sleep(1500);
+                UserDashboardLoop();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[!] Web Login Failed: {Client.RisponceCollection}");
+                Console.ResetColor();
+                Console.WriteLine("\nPress any key to return to main menu.");
+                SafeReadKey();
             }
         }
 
