@@ -24,9 +24,9 @@ namespace AuthVaultix
     {
         private readonly AuthVaultixCore _core;
 
-        public AuthVaultixClient(string appName, string ownerId, string secret, string version)
+        public AuthVaultixClient(string appName, string ownerId, string secret, string version, string tokenPath = "")
         {
-            _core = new AuthVaultixCore(appName, ownerId, secret, version);
+            _core = new AuthVaultixCore(appName, ownerId, secret, version, tokenPath);
         }
 
         public string RisponceCollection => _core.RisponceCollection;
@@ -60,6 +60,8 @@ namespace AuthVaultix
         public Task<List<ChatMessage>> ChatFetch(string channel) => _core.RetrieveChatHistory(channel);
         public bool Tamper(string reason) => _core.ReportTampering(reason);
         public bool CheckFeaturePermission(string feature) => _core.CheckFeaturePermission(feature);
+        public Task<bool> WebLogin() => _core.WebLogin();
+        public void Button(string buttonName) => _core.Button(buttonName);
     }
 
     public class OnlineUser
@@ -201,9 +203,10 @@ namespace AuthVaultix
         public bool Initialized { get; internal set; }
         public List<string> UserPermissions { get; internal set; } = new List<string>();
 
+        private readonly string _tokenPath;
         private string _encryptionKey;
 
-        public AuthVaultixCore(string appName, string ownerId, string secret, string version)
+        public AuthVaultixCore(string appName, string ownerId, string secret, string version, string tokenPath = "")
         {
             if (string.IsNullOrWhiteSpace(appName) || string.IsNullOrWhiteSpace(ownerId) || string.IsNullOrWhiteSpace(secret) || string.IsNullOrWhiteSpace(version))
             {
@@ -216,6 +219,7 @@ namespace AuthVaultix
             _ownerId = ownerId;
             _secret = secret;
             _version = version;
+            _tokenPath = tokenPath;
         }
 
         private void EnsureReady()
@@ -231,20 +235,36 @@ namespace AuthVaultix
             string iv = Guid.NewGuid().ToString("N").Substring(0, 16);
             _encryptionKey = iv + "-" + _secret;
             string hash = VaultixCrypto.FileHash(Process.GetCurrentProcess().MainModule.FileName);
-            var payload = new PayloadBuilder("init")
+
+            // Token file se read karo agar path diya hua hai
+            string token = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { token = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("init")
                 .WithValue("ver", _version)
                 .WithValue("enckey", iv)
                 .WithValue("hash", hash)
                 .WithValue("name", _appName)
-                .WithValue("ownerid", _ownerId)
-                .Compile();
+                .WithValue("ownerid", _ownerId);
+
+            if (!string.IsNullOrWhiteSpace(token))
+                builder = builder.WithValue("token", token);
+
+            var payload = builder.Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "init", out _);
             if (resp == "Authvaultix_Invalid") Diagnostics.Crash("App not found");
 
             var dto = JsonConvert.DeserializeObject<DtoInit>(resp);
             if (dto == null) Diagnostics.Crash("Invalid JSON");
-            if (!dto.Success) Diagnostics.Crash(dto.Msg);
+            if (!dto.Success)
+            {
+                RisponceCollection = dto.Msg;
+                Diagnostics.Crash(dto.Msg);
+            }
 
             SessionId = dto.SessId;
             Initialized = true;
@@ -257,7 +277,14 @@ namespace AuthVaultix
             RisponceCollection = null;
             EnsureReady();
 
-            var payload = new PayloadBuilder("login")
+            // Token file se read karo agar path diya hua hai
+            string loginToken = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { loginToken = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("login")
                 .WithContext(_appName, _ownerId, SessionId)
                 .WithValue("username", username)
                 .WithValue("pass", password)
@@ -268,8 +295,12 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
-                .WithValue("version", _version)
-                .Compile();
+                .WithValue("version", _version);
+
+            if (!string.IsNullOrWhiteSpace(loginToken))
+                builder = builder.WithValue("token", loginToken);
+
+            var payload = builder.Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
             var dto = JsonConvert.DeserializeObject<DtoAuth>(resp);
@@ -315,7 +346,14 @@ namespace AuthVaultix
             RisponceCollection = null;
             EnsureReady();
 
-            var payload = new PayloadBuilder("register")
+            // Token file se read karo agar path diya hua hai
+            string registerToken = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { registerToken = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("register")
                 .WithContext(_appName, _ownerId, SessionId)
                 .WithValue("username", username)
                 .WithValue("pass", password)
@@ -328,8 +366,12 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
-                .WithValue("version", _version)
-                .Compile();
+                .WithValue("version", _version);
+
+            if (!string.IsNullOrWhiteSpace(registerToken))
+                builder = builder.WithValue("token", registerToken);
+
+            var payload = builder.Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "register", out _);
             var dto = JsonConvert.DeserializeObject<DtoAuth>(resp);
@@ -349,7 +391,15 @@ namespace AuthVaultix
         public bool LicenseAccess(string licenseKey)
         {
             EnsureReady();
-            var payload = new PayloadBuilder("license")
+
+            // Token file se read karo agar path diya hua hai
+            string licenseToken = "";
+            if (!string.IsNullOrWhiteSpace(_tokenPath))
+            {
+                try { licenseToken = System.IO.File.ReadAllText(_tokenPath).Trim(); } catch { }
+            }
+
+            var builder = new PayloadBuilder("license")
                 .WithContext(_appName, _ownerId, SessionId)
                 .WithValue("key", licenseKey)
                 .WithValue("hwid", HardwareIdentifier.Fetch())
@@ -359,8 +409,12 @@ namespace AuthVaultix
                 .WithValue("architecture", SystemInfoCollector.GetArchitecture())
                 .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
                 .WithValue("ram", SystemInfoCollector.GetRamGB())
-                .WithValue("version", _version)
-                .Compile();
+                .WithValue("version", _version);
+
+            if (!string.IsNullOrWhiteSpace(licenseToken))
+                builder = builder.WithValue("token", licenseToken);
+
+            var payload = builder.Compile();
 
             string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "license", out _);
             var dto = JsonConvert.DeserializeObject<DtoAuth>(resp);
@@ -965,6 +1019,128 @@ namespace AuthVaultix
         {
             if (string.IsNullOrEmpty(feature) || UserPermissions == null) return false;
             return UserPermissions.Contains(feature);
+        }
+
+        public async Task<bool> WebLogin()
+        {
+            EnsureReady();
+
+            string datastore, datastore2, outputten;
+
+            start:
+
+            HttpListener listener = new HttpListener();
+            outputten = "handshake";
+            outputten = "http://localhost:1337/" + outputten + "/";
+
+            listener.Prefixes.Add(outputten);
+            listener.Start();
+
+            HttpListenerContext context = listener.GetContext();
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse responsepp = context.Response;
+
+            responsepp.AddHeader("Access-Control-Allow-Methods", "GET, POST");
+            responsepp.AddHeader("Access-Control-Allow-Origin", "*");
+            responsepp.AddHeader("Via", "AuthVaultix");
+
+            if (request.HttpMethod == "OPTIONS")
+            {
+                responsepp.StatusCode = (int)HttpStatusCode.OK;
+                Thread.Sleep(1);
+                listener.Stop();
+                goto start;
+            }
+
+            listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
+            listener.UnsafeConnectionNtlmAuthentication = true;
+            listener.IgnoreWriteExceptions = true;
+
+            string user = request.QueryString["user"];
+            string token = request.QueryString["token"];
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(token))
+            {
+                string data = request.RawUrl ?? "";
+                datastore2 = data.Replace("/handshake?user=", "").Replace("&token=", " ");
+                datastore = datastore2;
+                string[] parts = datastore.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2)
+                {
+                    user = parts[0];
+                    token = parts[1];
+                }
+            }
+
+            var payload = new PayloadBuilder("login")
+                .WithContext(_appName, _ownerId, SessionId)
+                .WithValue("username", user)
+                .WithValue("token", token)
+                .WithValue("hwid", HardwareIdentifier.Fetch())
+                .WithValue("os", SystemInfoCollector.GetOSVersion())
+                .WithValue("platform", SystemInfoCollector.GetPlatform())
+                .WithValue("device", SystemInfoCollector.GetDeviceType())
+                .WithValue("architecture", SystemInfoCollector.GetArchitecture())
+                .WithValue("cpu_cores", SystemInfoCollector.GetCpuCores())
+                .WithValue("ram", SystemInfoCollector.GetRamGB())
+                .WithValue("version", _version)
+                .Compile();
+
+            string resp = NetworkAgent.Post(_apiUrl, payload, _encryptionKey, "login", out _);
+            var dto = JsonConvert.DeserializeObject<DtoAuth>(resp);
+            bool success = dto != null && dto.Success;
+
+            if (success)
+            {
+                CurrentUser = dto.Profile;
+                UserPermissions = dto.Permissions ?? new List<string>();
+                if (!string.IsNullOrWhiteSpace(dto.SessId)) SessionId = dto.SessId;
+
+                responsepp.StatusCode = 420;
+                responsepp.StatusDescription = "SHEESH";
+            }
+            else
+            {
+                RisponceCollection = dto?.Msg ?? "Web login failed";
+                responsepp.StatusCode = (int)HttpStatusCode.OK;
+                responsepp.StatusDescription = dto?.Msg ?? "Failed";
+            }
+
+            byte[] buffer = Encoding.UTF8.GetBytes("Complete");
+            responsepp.ContentLength64 = buffer.Length;
+            using (Stream output = responsepp.OutputStream)
+            {
+                output.Write(buffer, 0, buffer.Length);
+            }
+            Thread.Sleep(1);
+            listener.Stop();
+
+            return success;
+        }
+
+        public void Button(string buttonName)
+        {
+            EnsureReady();
+
+            HttpListener listener = new HttpListener();
+            string prefix = $"http://localhost:1337/{buttonName}/";
+            listener.Prefixes.Add(prefix);
+            listener.Start();
+
+            HttpListenerContext context = listener.GetContext();
+            HttpListenerRequest request = context.Request;
+            HttpListenerResponse responsepp = context.Response;
+
+            responsepp.AddHeader("Access-Control-Allow-Methods", "GET, POST");
+            responsepp.AddHeader("Access-Control-Allow-Origin", "*");
+            responsepp.AddHeader("Via", "AuthVaultix");
+            responsepp.StatusCode = 420;
+            responsepp.StatusDescription = "SHEESH";
+
+            listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
+            listener.UnsafeConnectionNtlmAuthentication = true;
+            listener.IgnoreWriteExceptions = true;
+
+            listener.Stop();
         }
     }
 
