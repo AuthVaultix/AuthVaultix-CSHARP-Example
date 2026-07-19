@@ -61,6 +61,7 @@ namespace Client
             this.closeBtn = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.btnVIP = new System.Windows.Forms.Button();
+            this.btnCustomAction = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.chatroomGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -70,7 +71,7 @@ namespace Client
             this.userDataField.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.userDataField.ForeColor = System.Drawing.Color.White;
             this.userDataField.FormattingEnabled = true;
-            this.userDataField.Location = new System.Drawing.Point(7, 543);
+            this.userDataField.Location = new System.Drawing.Point(7, 580);
             this.userDataField.Name = "userDataField";
             this.userDataField.Size = new System.Drawing.Size(433, 132);
             this.userDataField.TabIndex = 63;
@@ -84,7 +85,7 @@ namespace Client
             this.onlineUsersField.Items.AddRange(new object[] {
             "Online Users:",
             ""});
-            this.onlineUsersField.Location = new System.Drawing.Point(446, 543);
+            this.onlineUsersField.Location = new System.Drawing.Point(446, 580);
             this.onlineUsersField.Name = "onlineUsersField";
             this.onlineUsersField.Size = new System.Drawing.Size(336, 132);
             this.onlineUsersField.TabIndex = 65;
@@ -435,14 +436,29 @@ namespace Client
             this.btnVIP.UseVisualStyleBackColor = false;
             this.btnVIP.Click += new System.EventHandler(this.btnVIP_Click);
             // 
+            // btnCustomAction
+            // 
+            this.btnCustomAction.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnCustomAction.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnCustomAction.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCustomAction.ForeColor = System.Drawing.Color.White;
+            this.btnCustomAction.Location = new System.Drawing.Point(4, 542);
+            this.btnCustomAction.Name = "btnCustomAction";
+            this.btnCustomAction.Size = new System.Drawing.Size(323, 30);
+            this.btnCustomAction.TabIndex = 140;
+            this.btnCustomAction.Text = "Listen Web Custom Action";
+            this.btnCustomAction.UseVisualStyleBackColor = false;
+            this.btnCustomAction.Click += new System.EventHandler(this.btnCustomAction_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(24)))), ((int)(((byte)(39)))));
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.ClientSize = new System.Drawing.Size(790, 677);
+            this.ClientSize = new System.Drawing.Size(790, 720);
             this.Controls.Add(this.btnVIP);
+            this.Controls.Add(this.btnCustomAction);
             this.Controls.Add(this.minBtn);
             this.Controls.Add(this.closeBtn);
             this.Controls.Add(this.CheackBlacklistBtn);
@@ -514,6 +530,7 @@ namespace Client
         private System.Windows.Forms.Button closeBtn;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btnVIP;
+        private System.Windows.Forms.Button btnCustomAction;
     }
 }
 

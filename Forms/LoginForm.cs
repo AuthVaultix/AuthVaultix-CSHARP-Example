@@ -1,19 +1,21 @@
 using AuthVaultix;
 using System;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Client
 {
     public partial class LoginForm : Form
     {
 
+
         public static AuthVaultixClient Client = new AuthVaultixClient(
             appName: "",
-            ownerId: "",
             secret: "",
-            version: "1.0"
+            version: "1.0",
+         //"Your_Path_Here" // token path here
         );
-        
+
         public LoginForm()
         {
             InitializeComponent();
@@ -22,6 +24,34 @@ namespace Client
             {
                 MessageBox.Show(Client.RisponceCollection);
                 return;
+            }
+        }
+
+        private async void webLoginBtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                webLoginBtn.Text = "Waiting for handshake...";
+                webLoginBtn.Enabled = false;
+
+                if (!await Client.WebLogin())
+                {
+                    MessageBox.Show(Client.RisponceCollection, "Login Failed");
+                    webLoginBtn.Text = "Web Log In";
+                    webLoginBtn.Enabled = true;
+                    return;
+                }
+
+                // Login successful
+                MainForm main = new MainForm();
+                main.Show();
+                this.Hide();
+            }
+            catch (Exception ex) 
+            { 
+                MessageBox.Show(ex.Message, "Error"); 
+                webLoginBtn.Text = "Web Log In";
+                webLoginBtn.Enabled = true;
             }
         }
 

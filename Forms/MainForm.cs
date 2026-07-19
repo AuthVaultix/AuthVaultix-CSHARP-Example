@@ -282,5 +282,31 @@ namespace Client
             }  
             MessageBox.Show("VIP Activated!"); // actual ESP logic
         }
+
+        private async void btnCustomAction_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                btnCustomAction.Text = "Listening for Web Action...";
+                btnCustomAction.Enabled = false;
+
+                // Listen for "MyCustomAction" button trigger in background
+                await Task.Run(() =>
+                {
+                    LoginForm.Client.Button("MyCustomAction");
+                });
+
+                MessageBox.Show("Web Button 'MyCustomAction' was clicked from the Website Dashboard!", "Web Action Triggered", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Web Button Error");
+            }
+            finally
+            {
+                btnCustomAction.Text = "Listen Web Custom Action";
+                btnCustomAction.Enabled = true;
+            }
+        }
     }
 }

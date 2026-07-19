@@ -47,6 +47,7 @@ namespace Client
             this.keyFild = new System.Windows.Forms.TextBox();
             this.pasFild = new System.Windows.Forms.TextBox();
             this.userFild = new System.Windows.Forms.TextBox();
+            this.webLoginBtn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -273,12 +274,27 @@ namespace Client
             this.userFild.Size = new System.Drawing.Size(300, 28);
             this.userFild.TabIndex = 100;
             // 
+            // 
+            // webLoginBtn
+            // 
+            this.webLoginBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.webLoginBtn.FlatAppearance.BorderSize = 0;
+            this.webLoginBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.webLoginBtn.ForeColor = System.Drawing.Color.White;
+            this.webLoginBtn.Location = new System.Drawing.Point(50, 495);
+            this.webLoginBtn.Name = "webLoginBtn";
+            this.webLoginBtn.Size = new System.Drawing.Size(300, 35);
+            this.webLoginBtn.TabIndex = 109;
+            this.webLoginBtn.Text = "Web Log In";
+            this.webLoginBtn.UseVisualStyleBackColor = false;
+            this.webLoginBtn.Click += new System.EventHandler(this.webLoginBtn_Click);
+            // 
             // LoginForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(17)))), ((int)(((byte)(24)))), ((int)(((byte)(39)))));
-            this.ClientSize = new System.Drawing.Size(400, 500);
+            this.ClientSize = new System.Drawing.Size(400, 550);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -298,6 +314,7 @@ namespace Client
             this.Controls.Add(this.keyFild);
             this.Controls.Add(this.pasFild);
             this.Controls.Add(this.userFild);
+            this.Controls.Add(this.webLoginBtn);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "LoginForm";
             this.Text = "LoginForm";
@@ -327,5 +344,6 @@ namespace Client
         private System.Windows.Forms.TextBox keyFild;
         private System.Windows.Forms.TextBox pasFild;
         private System.Windows.Forms.TextBox userFild;
+        private System.Windows.Forms.Button webLoginBtn;
     }
 }
